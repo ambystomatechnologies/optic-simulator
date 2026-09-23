@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="pageTitle">2D Optics Simulator · Ambystoma Studio · Interactive Physics</title>
+  <meta name="description" content="Interactive 2D optics simulator with custom lenses, chromatic dispersion, laser ray tracing, node editing, and physics demos. 100% free by Ambystoma Technologies." data-i18n="pageDesc">
+  <meta name="keywords" content="optics simulator, ray tracing, physics simulator, snell law, chromatic dispersion, ambystoma technologies, lenses, prisms, interactive optics">
+  <meta name="author" content="Ambystoma Technologies">
+  <meta name="theme-color" content="#0f111a">
+
+  <!-- Favicon Oficial -->
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <!-- Tipografía Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Estilos Principales -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Google AdSense Oficial Ambystoma Technologies -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5786595894984320" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Encabezado Superior -->
+    <header class="header-navbar">
+      <a href="https://ambystomatechnologies.github.io/" class="nav-brand" title="Ambystoma Technologies - Portal Principal" onclick="window.location.href='https://ambystomatechnologies.github.io/';">
+        <img src="logo.png" alt="Ambystoma Technologies" class="navbar-logo-img">
+        <div class="brand-text">
+          <h1 data-i18n="brandTitle">2D Optics Simulator <span>Ambystoma Studio</span></h1>
+          <p data-i18n="brandDesc">Interactive Ray Tracing, Lenses, Prisms & Reflection</p>
+        </div>
+      </a>
+
+      <div class="nav-right-actions">
+        <!-- Selector de Idiomas con Banderas Circulares -->
+        <div class="lang-switch" role="group" aria-label="Language selector">
+          <!-- Bandera US (Inglés - Default) -->
+          <button type="button" class="lang-btn active" id="btn-lang-en" onclick="setLanguage('en')" title="English" aria-label="English">
+            <svg viewBox="0 0 32 32" width="26" height="26">
+              <clipPath id="optics-flag-us"><circle cx="16" cy="16" r="16"/></clipPath>
+              <g clip-path="url(#optics-flag-us)">
+                <rect width="32" height="32" fill="#b22234"/>
+                <path d="M0 4.92h32M0 9.85h32M0 14.77h32M0 19.69h32M0 24.62h32M0 29.54h32" stroke="#ffffff" stroke-width="2.46"/>
+                <rect width="14" height="17.23" fill="#3c3b6e"/>
+                <g fill="#ffffff">
+                  <circle cx="3" cy="3" r="0.9"/>
+                  <circle cx="7" cy="3" r="0.9"/>
+                  <circle cx="11" cy="3" r="0.9"/>
+                  <circle cx="5" cy="6" r="0.9"/>
+                  <circle cx="9" cy="6" r="0.9"/>
+                  <circle cx="3" cy="9" r="0.9"/>
+                  <circle cx="7" cy="9" r="0.9"/>
+                  <circle cx="11" cy="9" r="0.9"/>
+                  <circle cx="5" cy="12" r="0.9"/>
+                  <circle cx="9" cy="12" r="0.9"/>
+                  <circle cx="3" cy="15" r="0.9"/>
+                  <circle cx="7" cy="15" r="0.9"/>
+                  <circle cx="11" cy="15" r="0.9"/>
+                </g>
+              </g>
+            </svg>
+          </button>
+
+          <!-- Bandera España (Español) -->
+          <button type="button" class="lang-btn" id="btn-lang-es" onclick="setLanguage('es')" title="Español" aria-label="Español">
+            <svg viewBox="0 0 32 32" width="26" height="26">
+              <clipPath id="optics-flag-es"><circle cx="16" cy="16" r="16"/></clipPath>
+              <g clip-path="url(#optics-flag-es)">
+                <rect width="32" height="32" fill="#aa151b"/>
+                <rect y="8" width="32" height="16" fill="#f1bf00"/>
+                <g transform="translate(6.5, 10.5) scale(0.68)">
+                  <path d="M4 1h8v6c0 3-4 5-4 5s-4-2-4-5V1z" fill="#aa151b" stroke="#f1bf00" stroke-width="0.8"/>
+                  <circle cx="8" cy="3" r="1.3" fill="#f1bf00"/>
+                  <rect x="2" y="2" width="1.2" height="9" fill="#94a3b8"/>
+                  <rect x="12.8" y="2" width="1.2" height="9" fill="#94a3b8"/>
+                </g>
+              </g>
+            </svg>
+          </button>
+        </div>
+
+        <button type="button" class="btn-nav-about" id="btn-open-about" data-i18n-title="btnAboutTitle">
+          <span>ℹ️</span>
+          <span data-i18n="btnAbout">About</span>
+        </button>
+
+        <div class="badge-security" data-i18n-title="securityBadgeTitle">
+          <span>⚡</span>
+          <span data-i18n="securityBadgeText">100% In-Browser</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Barra de Herramientas Principal -->
+    <div class="toolbar-top">
+      <div class="toolbar-group">
+        <button type="button" class="btn-tool active" id="btn-tool-select" data-i18n="btnSelect" data-i18n-title="btnSelectTitle">🔍 Move / Select</button>
+        <button type="button" class="btn-tool" id="btn-tool-node-edit" data-i18n="btnNodeEdit" data-i18n-title="btnNodeEditTitle">✏️ Deform Nodes</button>
+        <button type="button" class="btn-tool" id="btn-tool-draw-freehand" data-i18n="btnDrawFreehand" data-i18n-title="btnDrawFreehandTitle">✍️ Draw Freehand</button>
+        <button type="button" class="btn-tool" id="btn-tool-draw-poly" data-i18n="btnDrawPoly" data-i18n-title="btnDrawPolyTitle">📐 Custom Polygon</button>
+        <button type="button" class="btn-tool btn-finish-draw" id="btn-tool-finish-draw" data-i18n="btnFinishDraw" data-i18n-title="btnFinishDrawTitle">✅ OK - Finish</button>
+        <button type="button" class="btn-tool" id="btn-tool-ruler" data-i18n="btnRuler" data-i18n-title="btnRulerTitle">📏 Optical Ruler</button>
+      </div>
+
+      <div class="toolbar-separator"></div>
+
+      <!-- BOTÓN DEDICADO: AGREGAR NUEVA FUENTE DE LUZ -->
+      <button type="button" class="btn-tool btn-add-source-special" id="btn-add-light-source" data-i18n="btnAddLightSource" data-i18n-title="btnAddLightSourceTitle">
+        💡 Add Light Source
+      </button>
+
+      <div class="toolbar-separator"></div>
+
+      <!-- Desplegable Agregar Óptica -->
+      <select id="cb-add-optics" class="select-optics">
+        <option value="" selected data-i18n="optAddOptics">-- Add Optics --</option>
+        <option value="biconvex" data-i18n="optBiconvex">Biconvex Lens</option>
+        <option value="biconcave" data-i18n="optBiconcave">Biconcave Lens</option>
+        <option value="prism" data-i18n="optPrism">Triangular Prism</option>
+        <option value="slab" data-i18n="optSlab">Glass Block / Slab</option>
+        <option value="mirror" data-i18n="optMirror">Flat Mirror</option>
+        <option value="screen" data-i18n="optScreen">Detector Screen</option>
+      </select>
+
+      <!-- Desplegable Agregar Fuentes de Luz -->
+      <select id="cb-add-source" class="select-optics">
+        <option value="" selected data-i18n="optAddSource">-- Add Light Source --</option>
+        <option value="laser" data-i18n="optSourceLaser">Laser Beam</option>
+        <option value="fan" data-i18n="optSourceFan">Point Source (Fan)</option>
+        <option value="parallel" data-i18n="optSourceParallel">Parallel Beam</option>
+        <option value="object" data-i18n="optSourceObject">Pencil Object (Ray Object)</option>
+      </select>
+
+      <div class="toolbar-separator"></div>
+
+      <!-- Desplegable Demos de Física -->
+      <select id="cb-demos" class="select-optics">
+        <option value="" selected data-i18n="optDemos">Physics Demos...</option>
+        <option value="1" data-i18n="optDemo1">1. Rainbow Prism (Dispersion)</option>
+        <option value="2" data-i18n="optDemo2">2. Spherical Aberration in Lens</option>
+        <option value="3" data-i18n="optDemo3">3. Real Image Formation (Pencil)</option>
+        <option value="4" data-i18n="optDemo4">4. Custom Hand-Drawn Wavy Lens</option>
+        <option value="5" data-i18n="optDemo5">5. Total Internal Reflection (TIR)</option>
+      </select>
+
+      <div class="toolbar-separator"></div>
+
+      <!-- Botón Limpiar Escena -->
+      <button type="button" class="btn-tool btn-clear-scene" id="btn-clear-scene" data-i18n="btnClear" data-i18n-title="btnClearTitle">🗑️ Clear Scene</button>
+    </div>
+
+    <!-- Espacio Reservado para Publicidad Superior Oficial -->
+    <aside class="ad-banner-top">
+      <span class="ad-tag" data-i18n="adLabel">ADVERTISEMENT</span>
+      <div class="ad-slot-box" id="ad-top-slot">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-5786595894984320"
+             data-ad-slot="auto"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+      </div>
+    </aside>
+
+    <!-- Workspace Principal (3 Columnas) -->
+    <div class="workspace-layout">
+      <!-- Columna Izquierda: Elementos de la Escena y Detector -->
+      <aside class="panel-left">
+        <div style="padding: 0.75rem 0.75rem 0.25rem 0.75rem;">
+          <h4 class="group-title" data-i18n="panelSceneTitle">Scene Elements</h4>
+        </div>
+        <ul class="scene-list" id="list-scene-elements">
+          <!-- Renderizado dinámico vía JavaScript -->
+        </ul>
+        <button type="button" class="btn-delete-element" id="btn-delete-element" data-i18n="btnDeleteElement">Delete Element</button>
+
+        <!-- Monitor Detector Screen -->
+        <div class="detector-box">
+          <div style="font-weight: 700; color: #facc15; margin-bottom: 0.35rem;" data-i18n="panelDetectorTitle">Detector / Screen</div>
+          <div id="lbl-detector-info" style="font-size: 0.78rem; line-height: 1.4;">
+            No light hits recorded yet.
+          </div>
+        </div>
+      </aside>
+
+      <!-- Área Central del Canvas -->
+      <main class="canvas-area">
+        <canvas id="optics-canvas"></canvas>
+
+        <!-- Controles Flotantes de Zoom / Vista -->
+        <div class="canvas-view-controls">
+          <button type="button" class="btn-view-ctl" id="btn-zoom-in" title="Zoom In (+)">+</button>
+          <button type="button" class="btn-view-ctl" id="btn-zoom-out" title="Zoom Out (-)">−</button>
+          <button type="button" class="btn-view-ctl" id="btn-reset-view" title="Reset View (1:1)" style="font-size: 0.75rem;">1:1</button>
+        </div>
+      </main>
+
+      <!-- Columna Derecha: Propiedades Físicas -->
+      <aside class="panel-right">
+        <!-- 1. Material del Lente -->
+        <div class="group-box">
+          <h4 class="group-title" data-i18n="gbMaterialTitle">Lens Material / Medium</h4>
+          
+          <div class="ctrl-row">
+            <div class="ctrl-label-row">
+              <span data-i18n="lblRefractiveIndex">Refractive Index (n):</span>
+            </div>
+            <input type="number" id="spin-n" class="input-num" min="1.00" max="3.50" step="0.05" value="1.50">
+          </div>
+
+          <div class="preset-buttons-grid">
+            <button type="button" class="btn-mat-preset" data-n="1.00" data-i18n="btnMatAir">Air</button>
+            <button type="button" class="btn-mat-preset" data-n="1.33" data-i18n="btnMatWater">Water</button>
+            <button type="button" class="btn-mat-preset" data-n="1.50" data-i18n="btnMatGlass">Glass</button>
+            <button type="button" class="btn-mat-preset" data-n="1.66" data-i18n="btnMatFlint">Flint</button>
+            <button type="button" class="btn-mat-preset" data-n="2.42" data-i18n="btnMatDiamond">Diamond</button>
+          </div>
+
+          <label class="chk-row">
+            <input type="checkbox" id="chk-smooth" checked>
+            <span data-i18n="chkSmoothCurve">Smooth Curve (Spline)</span>
+          </label>
+
+          <label class="chk-row">
+            <input type="checkbox" id="chk-dispersion">
+            <span data-i18n="chkDispersion">Chromatic Dispersion (RGB Rainbow)</span>
+          </label>
+        </div>
+
+        <!-- 2. Transformación y Rotación -->
+        <div class="group-box">
+          <h4 class="group-title" data-i18n="gbTransformTitle">Transform & Rotation</h4>
+          <div class="ctrl-row">
+            <div class="ctrl-label-row">
+              <span data-i18n="lblRotation">Rotation (Degrees):</span>
+              <span class="ctrl-value" id="lbl-rot-value">0°</span>
+            </div>
+            <input type="range" id="slider-rotation" class="slider-custom" min="0" max="360" value="0">
+          </div>
+        </div>
+
+        <!-- 3. Propiedades de Fuente de Luz -->
+        <div class="group-box">
+          <h4 class="group-title" data-i18n="gbSourceTitle">Light Source Settings</h4>
+          
+          <div class="ctrl-row">
+            <div class="ctrl-label-row">
+              <span data-i18n="lblRayCount">Ray Count:</span>
+              <span class="ctrl-value" id="lbl-rays-value">11</span>
+            </div>
+            <input type="range" id="slider-rays" class="slider-custom" min="1" max="80" value="11">
+          </div>
+
+          <div class="ctrl-row">
+            <div class="ctrl-label-row">
+              <span data-i18n="lblSourceAngle">Emission Angle:</span>
+              <span class="ctrl-value" id="lbl-src-angle-value">0°</span>
+            </div>
+            <input type="range" id="slider-src-angle" class="slider-custom" min="-180" max="180" value="0">
+          </div>
+
+          <div class="ctrl-row">
+            <div class="ctrl-label-row">
+              <span data-i18n="lblWavelength">Wavelength (nm):</span>
+              <span class="ctrl-value" id="lbl-wl-value">532 nm</span>
+            </div>
+            <input type="range" id="slider-wl" class="slider-custom" min="380" max="750" value="532">
+            <div class="wl-preview-bar" id="color-wl-preview"></div>
+          </div>
+        </div>
+
+        <!-- 4. Simulación Global -->
+        <div class="group-box">
+          <h4 class="group-title" data-i18n="gbGlobalTitle">Simulation & Viewport</h4>
+          
+          <label class="chk-row">
+            <input type="checkbox" id="chk-grid" checked>
+            <span data-i18n="chkShowGrid">Show Grid</span>
+          </label>
+
+          <label class="chk-row">
+            <input type="checkbox" id="chk-axis" checked>
+            <span data-i18n="chkShowAxis">Show Optical Axis</span>
+          </label>
+
+          <div class="ctrl-row" style="margin-top: 0.35rem;">
+            <div class="ctrl-label-row">
+              <span data-i18n="lblMaxBounces">Max Ray Bounces:</span>
+            </div>
+            <input type="number" id="spin-bounces" class="input-num" min="5" max="200" value="50">
+          </div>
+        </div>
+
+        <!-- Publicidad en Sidebar Oficial -->
+        <aside class="ad-sidebar-card">
+          <div style="font-size: 0.62rem; color: #64748b; margin-bottom: 0.35rem;" data-i18n="adLabel">ADVERTISEMENT</div>
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-client="ca-pub-5786595894984320"
+               data-ad-slot="auto"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
+          <script>
+               (adsbygoogle = window.adsbygoogle || []).push({});
+          </script>
+        </aside>
+      </aside>
+    </div>
+
+    <!-- Barra de Estado Inferior -->
+    <footer class="status-bar">
+      <div class="status-left">
+        <span id="status-msg" data-i18n="statusReady">Ready. Select or draw lenses on the canvas.</span>
+      </div>
+      <div class="status-coords" id="lbl-coords">X: 0.0, Y: 0.0</div>
+    </footer>
+  </div>
+
+  <!-- Modal About / Acerca de -->
+  <div class="modal-overlay" id="about-modal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 data-i18n="aboutModalTitle">About 2D Optics Simulator</h3>
+        <button type="button" class="btn-close-modal" id="btn-close-about">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div style="text-align: center; margin-bottom: 0.5rem;">
+          <a href="https://ambystomatechnologies.github.io/" target="_blank" rel="noopener noreferrer">
+            <img src="logo.png" alt="Ambystoma Technologies" style="max-height: 44px; max-width: 80%;">
+          </a>
+          <div style="font-size: 0.78rem; color: var(--accent); font-weight: 700; margin-top: 0.35rem;" data-i18n="aboutDevBadge">Development & Scientific Software</div>
+          <p data-i18n="aboutDevDesc" style="color: var(--text-dim); font-size: 0.82rem;">Interactive high-performance web optics suite developed by Ambystoma Technologies.</p>
+        </div>
+
+        <div style="background: rgba(0, 255, 204, 0.06); border: 1px solid rgba(0, 255, 204, 0.3); border-radius: 8px; padding: 0.85rem;">
+          <h5 style="color: var(--accent); margin-bottom: 0.4rem;" data-i18n="aboutPhysicsTitle">🔬 Physics Engine Highlights</h5>
+          <ul style="padding-left: 1.25rem; font-size: 0.82rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 0.35rem;">
+            <li data-i18n="aboutPhysics1">Vector Snell's Law with Total Internal Reflection (TIR) calculation.</li>
+            <li data-i18n="aboutPhysics2">Cauchy's dispersion equation enabling true chromatic rainbow splitting.</li>
+            <li data-i18n="aboutPhysics3">Catmull-Rom closed splines for sculptable organic lenses and node deformation.</li>
+            <li data-i18n="aboutPhysics4">Detector screens with real-time photon intensity distribution graphs.</li>
+          </ul>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem;">
+          <h5 style="color: #ffffff; margin-bottom: 0.35rem;" data-i18n="aboutFreeTitle">✨ 100% Free & Open-Access</h5>
+          <p style="font-size: 0.82rem; color: var(--text-dim);" data-i18n="aboutFreeDesc">This tool is completely free, runs locally in your web browser with hardware-accelerated Canvas, requires no signup, and does not send any data to external servers.</p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-primary" id="btn-accept-about" data-i18n="btnAcceptAbout">Understood & Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor de Notificaciones Toast -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Scripts en orden de dependencia -->
+  <script src="js/i18n.js"></script>
+  <script src="js/physics.js"></script>
+  <script src="js/elements.js"></script>
+  <script src="js/canvas.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
