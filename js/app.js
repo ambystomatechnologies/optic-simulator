@@ -1173,16 +1173,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (sideTabLeft) {
       sideTabLeft.classList.toggle('is-open', Boolean(isLeftOpen));
-      if (arrowTabLeft) arrowTabLeft.textContent = isLeftOpen ? '◂' : '▸';
+      if (arrowTabLeft) arrowTabLeft.textContent = isLeftOpen ? '◀' : '▶';
     }
 
     if (sideTabRight) {
       sideTabRight.classList.toggle('is-open', Boolean(isRightOpen));
-      if (arrowTabRight) arrowTabRight.textContent = isRightOpen ? '▸' : '◂';
+      if (arrowTabRight) arrowTabRight.textContent = isRightOpen ? '▶' : '◀';
     }
 
     if (btnToggleScene) btnToggleScene.classList.toggle('active', Boolean(isLeftOpen));
     if (btnToggleProps) btnToggleProps.classList.toggle('active', Boolean(isRightOpen));
+
+    // Ocultar controles de zoom (+, -, 1:1) en dispositivos móviles
+    const isMobile = isMobileOrTabletDevice() || window.innerHeight <= 620 || window.innerWidth <= 950;
+    const zoomControls = document.querySelector('.canvas-view-controls');
+    if (zoomControls) {
+      zoomControls.style.display = isMobile ? 'none' : '';
+    }
   }
 
   function toggleLeftPanel() {
@@ -1227,6 +1234,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (panelRight) panelRight.classList.remove('mobile-open');
     updateSideTabStates();
   });
+
+  window.addEventListener('resize', updateSideTabStates);
+  updateSideTabStates();
 
   // --- CONTROL DE VISTA HORIZONTAL OBLIGATORIA EN MÓVILES ---
   const landscapeOverlay = document.getElementById('landscape-lock-overlay');

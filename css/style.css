@@ -976,12 +976,13 @@ html, body {
 .side-tab-toggle {
   display: none;
   position: absolute;
-  top: 8px;
+  top: 10px !important;
+  transform: none !important;
   background: rgba(23, 25, 38, 0.92);
   border: 1.5px solid var(--accent);
   color: var(--accent);
   font-family: var(--font-main);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 700;
   padding: 0.35rem 0.65rem;
   border-radius: 8px;
@@ -1005,30 +1006,25 @@ html, body {
 }
 
 .side-tab-left {
-  left: 8px;
+  left: 10px !important;
 }
 
 .side-tab-left.is-open {
-  left: 246px;
+  left: 246px !important;
   background: rgba(0, 255, 204, 0.22);
 }
 
 .side-tab-right {
-  right: 8px; /* Ocupa exactamente la posición de los botones (+, -, 1:1) */
+  right: 10px !important; /* Ocupa exactamente la posición de los botones (+, -, 1:1) */
 }
 
 .side-tab-right.is-open {
-  right: 256px;
+  right: 256px !important;
   background: rgba(0, 255, 204, 0.22);
 }
 
-.tab-icon {
-  font-size: 0.92rem;
-  line-height: 1;
-}
-
 .tab-arrow {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 800;
   line-height: 1;
 }
@@ -1287,14 +1283,7 @@ html, body {
   }
 
   .canvas-view-controls {
-    top: 10px;
-    right: 10px;
-  }
-
-  .btn-view-ctl {
-    width: 36px;
-    height: 36px;
-    font-size: 1.05rem;
+    display: none !important;
   }
 }
 
@@ -1430,13 +1419,15 @@ html, body {
 /* ==========================================================================
    VISTA HORIZONTAL MÓVIL (LANDSCAPE ERGONÓMICO EN SMARTPHONES)
    ========================================================================== */
-@media (max-height: 520px), (max-width: 900px) {
-  /* Mostrar botones desplegables sobre el canvas */
+@media (max-height: 600px), (max-width: 950px), (pointer: coarse) and (orientation: landscape) {
+  /* Mostrar botones desplegables sobre el canvas en las esquinas superiores */
   .side-tab-toggle {
     display: inline-flex !important;
+    top: 10px !important;
+    transform: none !important;
   }
 
-  /* Ocultar botones de zoom (+, -, 1:1) en móvil: reemplazados por el botón desplegable de Ajustes (Engrane) */
+  /* Ocultar botones de zoom (+, -, 1:1) en móvil: eliminados completamente de la vista */
   .canvas-view-controls {
     display: none !important;
   }
