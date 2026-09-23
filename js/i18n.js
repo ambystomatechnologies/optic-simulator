@@ -69,6 +69,10 @@ const OPTICS_I18N = {
     btnClearTitle: "Remove all elements and reset scene",
 
     // Left Panel (Scene Elements & Detector)
+    btnSaveScene: "💾 Save",
+    btnSaveSceneTitle: "Save current optics setup to a JSON file",
+    btnOpenScene: "📂 Open",
+    btnOpenSceneTitle: "Open and load a previously saved optics setup JSON file",
     panelSceneTitle: "Scene Elements",
     btnDeleteElement: "Delete Element",
     panelDetectorTitle: "Light Detector Screen",
@@ -139,6 +143,9 @@ const OPTICS_I18N = {
     toast_element_added: '"{name}" added to scene.',
     toast_source_added: "New light source added to scene.",
     toast_screen_added: "Detector screen added to scene.",
+    toast_scene_saved: "Scene configuration saved.",
+    toast_scene_loaded: "Scene configuration loaded successfully.",
+    toast_scene_load_error: "Error loading file: invalid scene format.",
     toast_drawing_finished: "Custom lens successfully created!",
     toast_drawing_min_points: "Please draw at least 3 points to form a closed lens.",
     toast_element_deleted: "Selected element removed.",
@@ -216,6 +223,10 @@ const OPTICS_I18N = {
     btnClearTitle: "Elimina todos los elementos y restablece el lienzo",
 
     // Left Panel (Scene Elements & Detector)
+    btnSaveScene: "💾 Guardar",
+    btnSaveSceneTitle: "Guarda la configuración actual de óptica en un archivo descargable",
+    btnOpenScene: "📂 Abrir",
+    btnOpenSceneTitle: "Abre y carga un archivo de configuración de óptica guardado previamente",
     panelSceneTitle: "Elementos de la Escena",
     btnDeleteElement: "Eliminar Elemento",
     panelDetectorTitle: "Detector / Pantalla de Luz",
@@ -286,6 +297,9 @@ const OPTICS_I18N = {
     toast_element_added: '"{name}" añadido a la escena.',
     toast_source_added: "Nueva fuente de luz añadida a la escena.",
     toast_screen_added: "Pantalla detectora añadida a la escena.",
+    toast_scene_saved: "Configuración de escena guardada con éxito.",
+    toast_scene_loaded: "Configuración de escena cargada con éxito.",
+    toast_scene_load_error: "Error al abrir el archivo: formato de escena inválido.",
     toast_drawing_finished: "¡Lente personalizada creada con éxito!",
     toast_drawing_min_points: "Por favor dibuja al menos 3 puntos para cerrar la lente.",
     toast_element_deleted: "Elemento seleccionado eliminado.",

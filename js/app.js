@@ -30,7 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnZoomOut = document.getElementById('btn-zoom-out');
   const btnResetView = document.getElementById('btn-reset-view');
 
-  // Elementos del panel izquierdo
+  // Elementos del panel izquierdo (Guardar / Abrir / Lista de Elementos)
+  const btnSaveScene = document.getElementById('btn-save-scene');
+  const btnOpenScene = document.getElementById('btn-open-scene');
+  const fileInputScene = document.getElementById('file-input-scene');
   const listSceneElements = document.getElementById('list-scene-elements');
   const btnDeleteElement = document.getElementById('btn-delete-element');
   const lblDetectorInfo = document.getElementById('lbl-detector-info');
@@ -297,6 +300,228 @@ document.addEventListener('DOMContentLoaded', () => {
       if (sim.selectedElement) {
         sim.removeSelected();
         showToast(window.t('toast_element_deleted'), 'info');
+      }
+    });
+  }
+
+  // --- GESTIÓN DE GUARDAR Y ABRIR CONFIGURACIÓN DE ESCENA ---
+
+  // Construye un slug alusivo a los elementos/lentes agregados a la escena
+  function buildSceneElementsSlug(elements, sources) {
+    const names = [];
+
+    // Recoger nombres significativos de los elementos ópticos (lentes, prismas, espejos, etc.)
+    for (const elem of elements) {
+      if (elem && elem.name) {
+        const clean = elem.name
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-zA-Z0-9]/g, '_')
+          .replace(/_+/g, '_')
+          .replace(/^_|_$/g, '');
+        if (clean && !names.includes(clean)) {
+          names.push(clean);
+        }
+      }
+      if (names.length >= 3) break;
+    }
+
+    // Si no hay elementos ópticos pero hay fuentes
+    if (names.length === 0 && sources.length > 0) {
+      for (const src of sources) {
+        if (src && src.name) {
+          const clean = src.name
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-zA-Z0-9]/g, '_')
+            .replace(/_+/g, '_')
+            .replace(/^_|_$/g, '');
+          if (clean && !names.includes(clean)) {
+            names.push(clean);
+          }
+        }
+        if (names.length >= 2) break;
+      }
+    }
+
+    return names.length > 0 ? names.join('_') : 'Configuracion';
+  }
+
+  function saveCurrentScene() {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const dateStr = `${yyyy}-${mm}-${dd}`;
+
+    const alusivo = buildSceneElementsSlug(sim.elements, sim.sources);
+    const fileName = `Ambystoma_Optics_${alusivo}_${dateStr}.json`;
+
+    // Serializar elementos ópticos
+    const serializedElements = sim.elements.map(elem => {
+      if (elem instanceof CustomLens) {
+        return {
+          type: 'CustomLens',
+          name: elem.name,
+          controlPoints: elem.controlPoints,
+          n: elem.n,
+          nAmbient: elem.nAmbient,
+          isSmooth: elem.isSmooth,
+          dispersionEnabled: elem.dispersionEnabled,
+          currentRotationDeg: elem.currentRotationDeg,
+          isActive: elem.isActive
+        };
+      } else if (elem instanceof FlatMirror) {
+        return {
+          type: 'FlatMirror',
+          name: elem.name,
+          p1: elem.p1,
+          p2: elem.p2,
+          isActive: elem.isActive
+        };
+      } else if (elem instanceof DetectorScreen) {
+        return {
+          type: 'DetectorScreen',
+          name: elem.name,
+          p1: elem.p1,
+          p2: elem.p2,
+          isActive: elem.isActive
+        };
+      }
+      return null;
+    }).filter(Boolean);
+
+    // Serializar fuentes de luz
+    const serializedSources = sim.sources.map(src => {
+      return {
+        type: 'LightSource',
+        name: src.name,
+        position: src.position,
+        angleDeg: src.angleDeg,
+        isActive: src.isActive,
+        rayCount: src.rayCount,
+        wavelength: src.wavelength,
+        beamWidth: src.beamWidth,
+        apertureDeg: src.apertureDeg,
+        sourceType: src.sourceType,
+        isWhiteLight: Boolean(src.isWhiteLight)
+      };
+    });
+
+    const sceneData = {
+      app: 'Ambystoma Optics 2D Studio',
+      platform: 'Ambystoma Technologies',
+      version: '1.0',
+      exportedAt: now.toISOString(),
+      elements: serializedElements,
+      sources: serializedSources,
+      viewport: {
+        zoomLevel: sim.zoomLevel,
+        panOffset: sim.panOffset
+      }
+    };
+
+    const jsonStr = JSON.stringify(sceneData, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast(window.t('toast_scene_saved') || `Guardado: ${fileName}`, 'success');
+  }
+
+  function loadSceneFromFile(file) {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data || (!Array.isArray(data.elements) && !Array.isArray(data.sources))) {
+          showToast(window.t('toast_scene_load_error'), 'error');
+          return;
+        }
+
+        sim.clearScene();
+
+        // Cargar elementos ópticos
+        if (Array.isArray(data.elements)) {
+          for (const item of data.elements) {
+            let elem = null;
+            if (item.type === 'CustomLens' && Array.isArray(item.controlPoints)) {
+              elem = new CustomLens(
+                item.controlPoints,
+                item.n || 1.5,
+                item.name || 'Lente',
+                item.isSmooth || false,
+                item.dispersionEnabled || false
+              );
+              if (item.currentRotationDeg !== undefined) {
+                elem.currentRotationDeg = item.currentRotationDeg;
+              }
+            } else if (item.type === 'FlatMirror' && item.p1 && item.p2) {
+              elem = new FlatMirror(item.p1, item.p2, item.name || 'Espejo');
+            } else if (item.type === 'DetectorScreen' && item.p1 && item.p2) {
+              elem = new DetectorScreen(item.p1, item.p2, item.name || 'Pantalla Detectora');
+            }
+
+            if (elem) {
+              elem.isActive = item.isActive !== false;
+              sim.addElement(elem);
+            }
+          }
+        }
+
+        // Cargar fuentes de luz
+        if (Array.isArray(data.sources)) {
+          for (const s of data.sources) {
+            const src = new LightSource(
+              s.position || [-200, 0],
+              s.angleDeg || 0,
+              s.name || 'Fuente de Luz'
+            );
+            src.isActive = s.isActive !== false;
+            src.rayCount = s.rayCount || 11;
+            src.wavelength = s.wavelength || 532.0;
+            src.beamWidth = s.beamWidth || 40.0;
+            src.apertureDeg = s.apertureDeg || 30.0;
+            src.sourceType = s.sourceType || 'laser';
+            src.isWhiteLight = Boolean(s.isWhiteLight);
+            sim.addSource(src);
+          }
+        }
+
+        // Cargar viewport si existe
+        if (data.viewport) {
+          if (data.viewport.zoomLevel) sim.zoomLevel = data.viewport.zoomLevel;
+          if (data.viewport.panOffset) sim.panOffset = data.viewport.panOffset;
+        }
+
+        showToast(window.t('toast_scene_loaded'), 'success');
+      } catch (err) {
+        console.error('Error al cargar archivo de escena:', err);
+        showToast(window.t('toast_scene_load_error'), 'error');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  if (btnSaveScene) {
+    btnSaveScene.addEventListener('click', saveCurrentScene);
+  }
+
+  if (btnOpenScene && fileInputScene) {
+    btnOpenScene.addEventListener('click', () => {
+      fileInputScene.value = '';
+      fileInputScene.click();
+    });
+
+    fileInputScene.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        loadSceneFromFile(e.target.files[0]);
       }
     });
   }

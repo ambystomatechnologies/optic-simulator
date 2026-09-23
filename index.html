@@ -115,7 +115,18 @@
     <div class="workspace-layout">
       <!-- Columna Izquierda: Elementos de la Escena y Detector -->
       <aside class="panel-left">
-        <div style="padding: 0.75rem 0.75rem 0.25rem 0.75rem;">
+        <!-- Barra de Guardar / Abrir Configuración de Escena -->
+        <div class="scene-io-bar">
+          <button type="button" class="btn-scene-io btn-save-scene" id="btn-save-scene" data-i18n="btnSaveScene" data-i18n-title="btnSaveSceneTitle">
+            💾 Save
+          </button>
+          <button type="button" class="btn-scene-io btn-open-scene" id="btn-open-scene" data-i18n="btnOpenScene" data-i18n-title="btnOpenSceneTitle">
+            📂 Open
+          </button>
+          <input type="file" id="file-input-scene" accept=".json,application/json" style="display: none;">
+        </div>
+
+        <div style="padding: 0.5rem 0.75rem 0.25rem 0.75rem;">
           <h4 class="group-title" data-i18n="panelSceneTitle">Scene Elements</h4>
         </div>
         <ul class="scene-list" id="list-scene-elements">
