@@ -506,20 +506,35 @@ class OpticsCanvasController {
           const s0 = this.worldToScreen(p0[0], p0[1]);
           const s1 = this.worldToScreen(p1[0], p1[1]);
 
+          // El slider de cantidad de rayos (1 a 80) controla directamente el grosor del haz de luz blanca
+          const count = src.rayCount || 11;
+          const beamThickness = Math.max(2.5, 1.8 + count * 0.62);
+          const glowBlur = Math.min(30, 6 + beamThickness * 0.55);
+
           ctx.save();
-          // Halo de dispersión blanco grueso
-          ctx.strokeStyle = '#ffffff';
+          // Halo de resplandor blanco exterior
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
           ctx.shadowColor = 'rgba(255, 255, 255, 0.95)';
-          ctx.shadowBlur = 10;
-          ctx.lineWidth = 4.2;
+          ctx.shadowBlur = glowBlur;
+          ctx.lineWidth = beamThickness + 4;
           ctx.beginPath();
           ctx.moveTo(s0.x, s0.y);
           ctx.lineTo(s1.x, s1.y);
           ctx.stroke();
 
-          // Núcleo brillante
+          // Cuerpo sólido del haz blanco con el grosor seleccionado por el slider
           ctx.strokeStyle = '#ffffff';
-          ctx.lineWidth = 2.2;
+          ctx.shadowBlur = Math.min(16, 4 + beamThickness * 0.3);
+          ctx.lineWidth = beamThickness;
+          ctx.beginPath();
+          ctx.moveTo(s0.x, s0.y);
+          ctx.lineTo(s1.x, s1.y);
+          ctx.stroke();
+
+          // Núcleo central hiperbrillante
+          ctx.strokeStyle = '#ffffff';
+          ctx.shadowBlur = 0;
+          ctx.lineWidth = Math.max(1.8, beamThickness * 0.35);
           ctx.beginPath();
           ctx.moveTo(s0.x, s0.y);
           ctx.lineTo(s1.x, s1.y);
@@ -528,18 +543,20 @@ class OpticsCanvasController {
         }
 
         // 2. Dibujar las Refracciones Espectrales en los 7 Colores del Arcoíris (a partir del primer impacto en el cristal)
+        const count = src.rayCount || 11;
+        const refrThickness = Math.max(2.0, 1.4 + count * 0.12);
         for (let r = 0; r < rayPaths.length; r++) {
           const { ray, path } = rayPaths[r];
           if (path.length <= 1) continue;
 
           const rgb = ray.color;
           const colorStr = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-          const glowColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.55)`;
+          const glowColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.65)`;
 
           ctx.strokeStyle = colorStr;
           ctx.shadowColor = glowColor;
-          ctx.shadowBlur = 6;
-          ctx.lineWidth = 2.2;
+          ctx.shadowBlur = Math.min(16, 5 + refrThickness * 0.8);
+          ctx.lineWidth = refrThickness;
 
           ctx.beginPath();
           const startPt = this.worldToScreen(path[1][0], path[1][1]);
@@ -709,8 +726,12 @@ class OpticsCanvasController {
       ctx.shadowColor = 'rgba(0, 255, 204, 0.4)';
       ctx.shadowBlur = isSelected ? 12 : 6;
 
+      const halfH = src.isWhiteLight 
+        ? Math.max(10, Math.min(28, (1.8 + (src.rayCount || 11) * 0.62) * 0.55)) 
+        : 10;
+
       ctx.beginPath();
-      ctx.rect(-16, -10, 20, 20);
+      ctx.rect(-16, -halfH, 20, halfH * 2);
       ctx.fill();
       ctx.stroke();
 
@@ -726,9 +747,9 @@ class OpticsCanvasController {
         ctx.shadowBlur = 8;
       }
       ctx.beginPath();
-      ctx.moveTo(4, -8);
+      ctx.moveTo(4, -halfH * 0.75);
       ctx.lineTo(14, 0);
-      ctx.lineTo(4, 8);
+      ctx.lineTo(4, halfH * 0.75);
       ctx.closePath();
       ctx.fill();
 

@@ -371,9 +371,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (sliderRays) {
     sliderRays.addEventListener('input', () => {
       const count = parseInt(sliderRays.value);
-      if (lblRaysValue) lblRaysValue.textContent = count;
       const targetSrc = getTargetLightSource();
       if (targetSrc) targetSrc.rayCount = count;
+      updateRaysLabelUI(targetSrc, count);
     });
   }
 
@@ -394,6 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
         targetSrc.wavelength = wl;
         targetSrc.isWhiteLight = false;
         if (chkWhiteLight) chkWhiteLight.checked = false;
+        updateRaysLabelUI(targetSrc);
       }
       updateWlPreviewUI(targetSrc || { wavelength: wl, isWhiteLight: false });
     });
@@ -405,8 +406,21 @@ document.addEventListener('DOMContentLoaded', () => {
       if (targetSrc) {
         targetSrc.isWhiteLight = chkWhiteLight.checked;
         updateWlPreviewUI(targetSrc);
+        updateRaysLabelUI(targetSrc);
       }
     });
+  }
+
+  function updateRaysLabelUI(src, count) {
+    if (!lblRaysValue) return;
+    const n = count !== undefined ? count : (src ? src.rayCount : 11);
+    if (src && src.isWhiteLight) {
+      const px = Math.round(1.8 + n * 0.62);
+      const isEs = window.currentLang === 'es';
+      lblRaysValue.textContent = `${n} (${isEs ? 'Grosor' : 'Width'}: ${px}px)`;
+    } else {
+      lblRaysValue.textContent = n;
+    }
   }
 
   function updateWlPreviewUI(src) {
@@ -472,7 +486,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (elem instanceof LightSource) {
       if (sliderRays) {
         sliderRays.value = elem.rayCount;
-        if (lblRaysValue) lblRaysValue.textContent = elem.rayCount;
+        updateRaysLabelUI(elem);
       }
       if (sliderSrcAngle) {
         sliderSrcAngle.value = Math.round(elem.angleDeg);
@@ -887,6 +901,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('languageChanged', () => {
     updateSceneList();
     updateDetectorInfo();
+    updateRaysLabelUI(getTargetLightSource());
   });
 
   // Iniciar con la demo 1 (Prisma arcoíris) por defecto
