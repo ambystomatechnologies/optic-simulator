@@ -505,6 +505,38 @@ function createGlassSlab(centerX, centerY, width = 140, height = 80, n = 1.5) {
   return new CustomLens(pts, n, "Bloque de Vidrio", false);
 }
 
+function createRightAnglePrism(centerX, centerY, width = 90, height = 130, n = 1.52, dispersion = false) {
+  // Prisma rectangular 45°-90°-45° (Porro / Retrorreflector)
+  const pts = [
+    [centerX - width / 2, centerY - height / 2],
+    [centerX + width / 2, centerY],
+    [centerX - width / 2, centerY + height / 2]
+  ];
+  return new CustomLens(pts, n, "Prisma Rectangular / Porro", false, dispersion);
+}
+
+function createPlanoConcaveLens(centerX, centerY, width = 35, height = 140, n = 1.68, dispersion = true) {
+  const pts = [];
+  const numSamples = 15;
+  const edgeW = width;
+  const centerW = width * 0.25;
+
+  pts.push([centerX - edgeW / 2, centerY - height / 2]);
+  pts.push([centerX + edgeW / 2, centerY - height / 2]);
+
+  // Cara cóncava derecha
+  for (let i = 0; i <= numSamples; i++) {
+    const t = -1.0 + (2.0 * i) / numSamples;
+    const y = t * (height / 2.0);
+    const x = centerW / 2 + (edgeW / 2 - centerW / 2) * (t * t);
+    pts.push([centerX + x, centerY + y]);
+  }
+
+  pts.push([centerX - edgeW / 2, centerY + height / 2]);
+
+  return new CustomLens(pts, n, "Lente Plano-Cóncava", false, dispersion);
+}
+
 // Exportar globalmente
 window.OpticalElement = OpticalElement;
 window.CustomLens = CustomLens;
@@ -515,3 +547,5 @@ window.createBiconvexLens = createBiconvexLens;
 window.createBiconcaveLens = createBiconcaveLens;
 window.createTriangularPrism = createTriangularPrism;
 window.createGlassSlab = createGlassSlab;
+window.createRightAnglePrism = createRightAnglePrism;
+window.createPlanoConcaveLens = createPlanoConcaveLens;

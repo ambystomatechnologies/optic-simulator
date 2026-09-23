@@ -245,8 +245,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (val === '1') loadDemoPrismDispersion();
       else if (val === '2') loadDemoSphericalAberration();
       else if (val === '3') loadDemoObjectImageFormation();
-      else if (val === '4') loadDemoCustomHandDrawnLens();
-      else if (val === '5') loadDemoTIR();
+      else if (val === '4') loadDemoConvergenceDivergence();
+      else if (val === '5') loadDemoBeamExpander();
+      else if (val === '6') loadDemoKeplerianTelescope();
+      else if (val === '7') loadDemoAchromaticDoublet();
+      else if (val === '8') loadDemoTIR();
+      else if (val === '9') loadDemoPeriscope();
+      else if (val === '10') loadDemoPorroPrism();
+      else if (val === '11') loadDemoLateralDisplacement();
+      else if (val === '12') loadDemoCustomHandDrawnLens();
 
       cbDemos.value = "";
     });
@@ -568,6 +575,214 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast(window.t('statusLoadedDemo', { name: window.t('optDemo3') }), 'info');
   }
 
+  // Demo 4: Convergencia vs Divergencia (Lente Convexa y Cóncava)
+  function loadDemoConvergenceDivergence() {
+    sim.clearScene();
+
+    // Superior: Lente Biconvexa (Convergente - Foco Real)
+    const convLens = createBiconvexLens(0.0, -85.0, 36, 110, 80, 80, 1.52);
+    convLens.name = "Lente Convergente (+Foco Real)";
+    sim.addElement(convLens);
+
+    const srcConv = new LightSource([-240.0, -85.0], 0.0, "Haz Colimado Convergente");
+    srcConv.sourceType = "parallel";
+    srcConv.rayCount = 9;
+    srcConv.beamWidth = 70.0;
+    srcConv.wavelength = 532.0; // Verde
+    sim.addSource(srcConv);
+
+    // Inferior: Lente Bicóncava (Divergente - Foco Virtual)
+    const divLens = createBiconcaveLens(0.0, 85.0, 36, 110, 1.52);
+    divLens.name = "Lente Divergente (-Foco Virtual)";
+    sim.addElement(divLens);
+
+    const srcDiv = new LightSource([-240.0, 85.0], 0.0, "Haz Colimado Divergente");
+    srcDiv.sourceType = "parallel";
+    srcDiv.rayCount = 9;
+    srcDiv.beamWidth = 70.0;
+    srcDiv.wavelength = 470.0; // Cian / Azul
+    sim.addSource(srcDiv);
+
+    showToast(window.t('statusLoadedDemo', { name: window.t('optDemo4') }), 'info');
+  }
+
+  // Demo 5: Combinación de Lentes (Expansor de Haz / Colimador Galileano)
+  function loadDemoBeamExpander() {
+    sim.clearScene();
+
+    // L1: Divergente bicóncava (expande el haz incidente)
+    const divLens = createBiconcaveLens(-80.0, 0.0, 28, 80, 1.52);
+    divLens.name = "L1: Lente Divergente";
+    sim.addElement(divLens);
+
+    // L2: Convergente biconvexa (recolima el haz con mayor diámetro)
+    const convLens = createBiconvexLens(100.0, 0.0, 48, 160, 125, 125, 1.52);
+    convLens.name = "L2: Lente Colimadora";
+    sim.addElement(convLens);
+
+    // Haz láser estrecho de entrada
+    const src = new LightSource([-240.0, 0.0], 0.0, "Haz Láser Estrecho (Input)");
+    src.sourceType = "parallel";
+    src.rayCount = 11;
+    src.beamWidth = 35.0;
+    src.wavelength = 635.0; // Rojo
+    sim.addSource(src);
+
+    // Sensor de salida
+    const screen = new DetectorScreen([240.0, -90.0], [240.0, 90.0], "Haz Expandido (Output)");
+    sim.addElement(screen);
+
+    showToast(window.t('statusLoadedDemo', { name: window.t('optDemo5') }), 'info');
+  }
+
+  // Demo 6: Telescopio Astronómico de Kepler (Dos Lentes Convexas)
+  function loadDemoKeplerianTelescope() {
+    sim.clearScene();
+
+    // Lente Objetivo (Focal larga)
+    const objLens = createBiconvexLens(-100.0, 0.0, 42, 170, 140, 140, 1.52);
+    objLens.name = "Objetivo (Focal Larga)";
+    sim.addElement(objLens);
+
+    // Lente Ocular (Focal corta)
+    const eyeLens = createBiconvexLens(150.0, 0.0, 32, 90, 65, 65, 1.52);
+    eyeLens.name = "Ocular (Focal Corta)";
+    sim.addElement(eyeLens);
+
+    // Haz proveniente de una estrella lejana con inclinación angular
+    const starRays = new LightSource([-270.0, 0.0], -3.5, "Luz de Estrella Lejana");
+    starRays.sourceType = "parallel";
+    starRays.rayCount = 13;
+    starRays.beamWidth = 90.0;
+    starRays.wavelength = 510.0;
+    sim.addSource(starRays);
+
+    showToast(window.t('statusLoadedDemo', { name: window.t('optDemo6') }), 'info');
+  }
+
+  // Demo 7: Doblete Acromático (Crown + Flint Glass)
+  function loadDemoAchromaticDoublet() {
+    sim.clearScene();
+
+    // Lente 1: Vidrio Crown (n=1.52, baja dispersión)
+    const crownLens = createBiconvexLens(-15.0, 0.0, 40, 140, 85, 85, 1.52);
+    crownLens.name = "Vidrio Crown (n=1.52)";
+    crownLens.dispersionEnabled = true;
+    sim.addElement(crownLens);
+
+    // Lente 2: Vidrio Flint (n=1.68, alta dispersión compensadora)
+    const flintLens = createPlanoConcaveLens(25.0, 0.0, 32, 140, 1.68, true);
+    flintLens.name = "Vidrio Flint (n=1.68)";
+    flintLens.dispersionEnabled = true;
+    sim.addElement(flintLens);
+
+    // Haz multicolor de entrada
+    const src = new LightSource([-240.0, 0.0], 0.0, "Haz Blanco Multiespectral");
+    src.sourceType = "parallel";
+    src.rayCount = 13;
+    src.beamWidth = 70.0;
+    src.wavelength = 532.0;
+    sim.addSource(src);
+
+    const screen = new DetectorScreen([230.0, -80.0], [230.0, 80.0], "Foco Acromático Común");
+    sim.addElement(screen);
+
+    showToast(window.t('statusLoadedDemo', { name: window.t('optDemo7') }), 'info');
+  }
+
+  // Demo 8: Total Internal Reflection & Waveguide
+  function loadDemoTIR() {
+    sim.clearScene();
+
+    const slab = createGlassSlab(0.0, 0.0, 320, 60, 1.62);
+    slab.name = "Guía de Onda / Fibra Óptica";
+    sim.addElement(slab);
+
+    const src = new LightSource([-200.0, 15.0], 35.0, "Láser en Ángulo Crítico");
+    src.sourceType = "laser";
+    src.rayCount = 1;
+    src.wavelength = 635.0; // Rojo
+    sim.addSource(src);
+
+    showToast(window.t('statusLoadedDemo', { name: window.t('optDemo8') }), 'info');
+  }
+
+  // Demo 9: Ley de Reflexión y Periscopio (Espejos Planos a 45°)
+  function loadDemoPeriscope() {
+    sim.clearScene();
+
+    // Espejo 1 inferior a 45°
+    const m1 = new FlatMirror([-120.0, 110.0], [-50.0, 40.0], "Espejo 1 (45°)");
+    sim.addElement(m1);
+
+    // Espejo 2 superior a 45°
+    const m2 = new FlatMirror([50.0, -40.0], [120.0, -110.0], "Espejo 2 (45°)");
+    sim.addElement(m2);
+
+    // Haz láser horizontal en la parte inferior
+    const src = new LightSource([-250.0, 75.0], 0.0, "Haz Láser (θi = θr)");
+    src.sourceType = "parallel";
+    src.rayCount = 5;
+    src.beamWidth = 25.0;
+    src.wavelength = 532.0; // Verde brillante
+    sim.addSource(src);
+
+    // Pantalla detectora en la salida superior
+    const screen = new DetectorScreen([240.0, -110.0], [240.0, -40.0], "Sensor Salida Periscopio");
+    sim.addElement(screen);
+
+    showToast(window.t('statusLoadedDemo', { name: window.t('optDemo9') }), 'info');
+  }
+
+  // Demo 10: Prisma de Porro (Retrorreflexión 180° y 90°)
+  function loadDemoPorroPrism() {
+    sim.clearScene();
+
+    // Prisma rectangular de Porro (hipotenusa vertical izquierda, catetos a la derecha)
+    const porro = createRightAnglePrism(0.0, 0.0, 100, 140, 1.52, false);
+    porro.name = "Prisma de Porro (n=1.52)";
+    sim.addElement(porro);
+
+    // Haz paralelo horizontal que entra por la hipotenusa
+    const src = new LightSource([-220.0, -30.0], 0.0, "Haz Láser Incidente");
+    src.sourceType = "parallel";
+    src.rayCount = 5;
+    src.beamWidth = 25.0;
+    src.wavelength = 490.0; // Cian
+    sim.addSource(src);
+
+    // Pantalla de recepción del haz reflejado a 180°
+    const screen = new DetectorScreen([-220.0, 10.0], [-220.0, 60.0], "Retrorreflexión 180°");
+    sim.addElement(screen);
+
+    showToast(window.t('statusLoadedDemo', { name: window.t('optDemo10') }), 'info');
+  }
+
+  // Demo 11: Desplazamiento Lateral en Lámina de Vidrio
+  function loadDemoLateralDisplacement() {
+    sim.clearScene();
+
+    // Lámina gruesa de vidrio de caras planas y paralelas
+    const slab = createGlassSlab(0.0, 0.0, 110, 180, 1.52);
+    slab.name = "Lámina de Caras Paralelas";
+    sim.addElement(slab);
+
+    // Haz láser en ángulo oblicuo (35°)
+    const src = new LightSource([-230.0, -50.0], 35.0, "Haz Oblicuo (Ley de Snell)");
+    src.sourceType = "parallel";
+    src.rayCount = 7;
+    src.beamWidth = 35.0;
+    src.wavelength = 532.0; // Verde
+    sim.addSource(src);
+
+    // Pantalla detectora del haz emergente desplazado
+    const screen = new DetectorScreen([200.0, 0.0], [200.0, 140.0], "Haz Desplazado Lateralmente");
+    sim.addElement(screen);
+
+    showToast(window.t('statusLoadedDemo', { name: window.t('optDemo11') }), 'info');
+  }
+
+  // Demo 12: Lente Deformada a Mano
   function loadDemoCustomHandDrawnLens() {
     sim.clearScene();
 
@@ -588,24 +803,7 @@ document.addEventListener('DOMContentLoaded', () => {
     src.beamWidth = 120.0;
     sim.addSource(src);
 
-    showToast(window.t('statusLoadedDemo', { name: window.t('optDemo4') }), 'info');
-  }
-
-  function loadDemoTIR() {
-    sim.clearScene();
-
-    // Bloque guía de onda
-    const slab = createGlassSlab(0.0, 0.0, 320, 60, 1.62);
-    slab.name = "Guía de Onda / Fibra Óptica";
-    sim.addElement(slab);
-
-    const src = new LightSource([-200.0, 15.0], 35.0, "Láser en Ángulo Crítico");
-    src.sourceType = "laser";
-    src.rayCount = 1;
-    src.wavelength = 635.0; // Rojo
-    sim.addSource(src);
-
-    showToast(window.t('statusLoadedDemo', { name: window.t('optDemo5') }), 'info');
+    showToast(window.t('statusLoadedDemo', { name: window.t('optDemo12') }), 'info');
   }
 
   // --- MODAL ABOUT ---
