@@ -158,8 +158,8 @@ const OPTICS_I18N = {
     mobileTipDrag: "1 Finger: Drag elements, sculpt nodes, or pan canvas",
     mobileTipPinch: "2 Fingers: Pinch to zoom in / out & move view",
     mobileWarningBtn: "Continue on Mobile",
-    btnMobileScene: "📋 Scene",
-    btnMobileProps: "⚙️ Settings",
+    btnMobileScene: "Scene",
+    btnMobileProps: "Settings",
     btnCloseDrawer: "✕ Close",
 
     // Landscape orientation lock
@@ -329,8 +329,8 @@ const OPTICS_I18N = {
     mobileTipDrag: "1 Dedo: Arrastra elementos, deforma nodos o desplaza la vista",
     mobileTipPinch: "2 Dedos: Pellizca para zoom y mueve el lienzo",
     mobileWarningBtn: "Continuar en el celular",
-    btnMobileScene: "📋 Escena",
-    btnMobileProps: "⚙️ Ajustes",
+    btnMobileScene: "Escena",
+    btnMobileProps: "Ajustes",
     btnCloseDrawer: "✕ Cerrar",
 
     // Bloqueo de orientación horizontal

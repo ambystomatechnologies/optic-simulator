@@ -1171,23 +1171,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const isLeftOpen = panelLeft && panelLeft.classList.contains('mobile-open');
     const isRightOpen = panelRight && panelRight.classList.contains('mobile-open');
 
-    if (sideTabLeft) sideTabLeft.classList.toggle('is-open', Boolean(isLeftOpen));
-    if (arrowTabLeft) arrowTabLeft.textContent = isLeftOpen ? '◀' : '▶';
-    if (btnToggleScene) btnToggleScene.classList.toggle('active', Boolean(isLeftOpen));
-
-    if (sideTabRight) sideTabRight.classList.toggle('is-open', Boolean(isRightOpen));
-    if (arrowTabRight) arrowTabRight.textContent = isRightOpen ? '▶' : '◀';
-    if (btnToggleProps) btnToggleProps.classList.toggle('active', Boolean(isRightOpen));
-
-    const zoomControls = document.querySelector('.canvas-view-controls');
-    if (zoomControls) {
-      zoomControls.classList.toggle('shifted', Boolean(isRightOpen));
+    if (sideTabLeft) {
+      sideTabLeft.classList.toggle('is-open', Boolean(isLeftOpen));
+      if (arrowTabLeft) arrowTabLeft.textContent = isLeftOpen ? '◂' : '▸';
     }
+
+    if (sideTabRight) {
+      sideTabRight.classList.toggle('is-open', Boolean(isRightOpen));
+      if (arrowTabRight) arrowTabRight.textContent = isRightOpen ? '▸' : '◂';
+    }
+
+    if (btnToggleScene) btnToggleScene.classList.toggle('active', Boolean(isLeftOpen));
+    if (btnToggleProps) btnToggleProps.classList.toggle('active', Boolean(isRightOpen));
   }
 
   function toggleLeftPanel() {
     if (!panelLeft) return;
     const willOpen = !panelLeft.classList.contains('mobile-open');
+    // Si se va a abrir el panel izquierdo, cerramos el derecho para no invadir el canvas de simulación
+    if (willOpen && panelRight && panelRight.classList.contains('mobile-open')) {
+      panelRight.classList.remove('mobile-open');
+    }
     panelLeft.classList.toggle('mobile-open', willOpen);
     updateSideTabStates();
   }
@@ -1195,6 +1199,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function toggleRightPanel() {
     if (!panelRight) return;
     const willOpen = !panelRight.classList.contains('mobile-open');
+    // Si se va a abrir el panel derecho, cerramos el izquierdo para mantener despejada la vista de simulación
+    if (willOpen && panelLeft && panelLeft.classList.contains('mobile-open')) {
+      panelLeft.classList.remove('mobile-open');
+    }
     panelRight.classList.toggle('mobile-open', willOpen);
     updateSideTabStates();
   }
@@ -1219,7 +1227,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (panelRight) panelRight.classList.remove('mobile-open');
     updateSideTabStates();
   });
-  if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeMobileDrawers);
 
   // --- CONTROL DE VISTA HORIZONTAL OBLIGATORIA EN MÓVILES ---
   const landscapeOverlay = document.getElementById('landscape-lock-overlay');

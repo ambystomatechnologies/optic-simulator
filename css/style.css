@@ -972,64 +972,65 @@ html, body {
   box-shadow: 0 0 10px var(--accent-glow);
 }
 
-/* Pestañas Laterales Desplegables para Móvil y Pantallas Horizontales */
+/* Botones Desplegables de Paneles en Móviles sobre el Canvas */
 .side-tab-toggle {
   display: none;
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(23, 25, 38, 0.94);
+  top: 8px;
+  background: rgba(23, 25, 38, 0.92);
   border: 1.5px solid var(--accent);
   color: var(--accent);
   font-family: var(--font-main);
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  padding: 0.55rem 0.65rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 8px;
   cursor: pointer;
   backdrop-filter: blur(10px);
-  box-shadow: 0 0 16px rgba(0, 255, 204, 0.35);
-  z-index: 175;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 255, 204, 0.3);
+  z-index: 170;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
   user-select: none;
-  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  touch-action: manipulation;
+  transition: left 0.25s cubic-bezier(0.16, 1, 0.3, 1), right 0.25s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s, color 0.2s;
 }
 
-.side-tab-toggle:hover {
+.side-tab-toggle:hover,
+.side-tab-toggle:active {
   background: var(--accent);
   color: #0f111a;
-  box-shadow: 0 0 20px var(--accent-glow);
+  box-shadow: 0 0 18px var(--accent-glow);
 }
 
 .side-tab-left {
-  left: 0;
-  border-left: none;
-  border-radius: 0 10px 10px 0;
+  left: 8px;
 }
 
 .side-tab-left.is-open {
-  left: 235px;
-  background: rgba(0, 255, 204, 0.2);
+  left: 246px;
+  background: rgba(0, 255, 204, 0.22);
 }
 
 .side-tab-right {
-  right: 0;
-  border-right: none;
-  border-radius: 10px 0 0 10px;
+  right: 8px; /* Ocupa exactamente la posición de los botones (+, -, 1:1) */
 }
 
 .side-tab-right.is-open {
-  right: 245px;
-  background: rgba(0, 255, 204, 0.2);
+  right: 256px;
+  background: rgba(0, 255, 204, 0.22);
 }
 
 .tab-icon {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
+  line-height: 1;
 }
 
 .tab-arrow {
-  font-size: 0.75rem;
-  font-weight: bold;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 /* Cabeceras de Drawer dentro de los paneles en Móvil */
@@ -1067,23 +1068,12 @@ html, body {
   background: rgba(255, 85, 119, 0.15);
 }
 
-/* Backdrop para Drawer en Móviles */
-.drawer-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(4px);
-  z-index: 140;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s ease;
-}
-
+/* Backdrop para Drawer en Móviles - DESACTIVADO para ver y manipular la simulación en tiempo real */
+.drawer-backdrop,
 .drawer-backdrop.active {
-  display: block;
-  opacity: 1;
-  pointer-events: auto;
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 /* Modal Cartel Inicial de Recomendación de Escritorio */
@@ -1223,9 +1213,8 @@ html, body {
 }
 
 @media (max-width: 900px) {
-  /* Mostrar botones de alternancia en Header */
   .btn-nav-mobile-toggle {
-    display: inline-flex;
+    display: none !important;
   }
 
   .badge-security {
@@ -1234,49 +1223,6 @@ html, body {
 
   .mobile-drawer-header {
     display: flex;
-  }
-
-  /* Los paneles se convierten en Drawers deslizables sobre el Canvas */
-  .panel-left {
-    display: none;
-  }
-
-  .panel-right {
-    display: none;
-  }
-
-  .panel-left.mobile-open,
-  .panel-right.mobile-open {
-    display: flex !important;
-    position: fixed;
-    top: 58px;
-    bottom: 0;
-    z-index: 150;
-    width: min(320px, 86vw);
-    background: var(--bg-panel);
-    box-shadow: 0 0 35px rgba(0, 0, 0, 0.85);
-  }
-
-  .panel-left.mobile-open {
-    left: 0;
-    border-right: 1px solid var(--border);
-    animation: slideDrawerLeft 0.24s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .panel-right.mobile-open {
-    right: 0;
-    border-left: 1px solid var(--border);
-    animation: slideDrawerRight 0.24s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  @keyframes slideDrawerLeft {
-    from { transform: translateX(-100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-  }
-
-  @keyframes slideDrawerRight {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
   }
 
   /* Barra de herramientas inferior con scroll horizontal táctil suave */
@@ -1485,9 +1431,14 @@ html, body {
    VISTA HORIZONTAL MÓVIL (LANDSCAPE ERGONÓMICO EN SMARTPHONES)
    ========================================================================== */
 @media (max-height: 520px), (max-width: 900px) {
-  /* Mostrar pestañas laterales en los bordes del canvas */
+  /* Mostrar botones desplegables sobre el canvas */
   .side-tab-toggle {
-    display: flex !important;
+    display: inline-flex !important;
+  }
+
+  /* Ocultar botones de zoom (+, -, 1:1) en móvil: reemplazados por el botón desplegable de Ajustes (Engrane) */
+  .canvas-view-controls {
+    display: none !important;
   }
 
   .header-navbar {
@@ -1523,32 +1474,33 @@ html, body {
   }
 
   .btn-nav-mobile-toggle {
-    display: inline-flex !important;
-    padding: 0.2rem 0.5rem !important;
-    font-size: 0.72rem !important;
+    display: none !important;
   }
 
-  /* Barras laterales colapsables / desplegables */
+  /* Barras laterales deslizables sobre el canvas sin oscurecer ni bloquear la simulación */
   .panel-left,
   .panel-right {
     display: flex !important;
     position: fixed !important;
     top: 40px !important;
     bottom: 38px !important;
-    z-index: 185 !important;
-    background: rgba(23, 25, 38, 0.97) !important;
-    backdrop-filter: blur(12px) !important;
-    box-shadow: 0 0 35px rgba(0, 0, 0, 0.9), 0 0 15px rgba(0, 255, 204, 0.15) !important;
+    z-index: 165 !important;
+    background: rgba(15, 17, 26, 0.95) !important;
+    backdrop-filter: blur(14px) !important;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.85) !important;
     overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
     padding: 0.5rem 0.65rem 1rem !important;
-    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    pointer-events: auto !important;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
   }
 
   .panel-left {
     left: 0 !important;
-    width: 235px !important;
-    max-width: 80vw !important;
+    width: 240px !important;
+    max-width: 46vw !important;
     border-right: 1px solid var(--border) !important;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.7) !important;
     transform: translateX(-100%) !important;
   }
 
@@ -1558,9 +1510,10 @@ html, body {
 
   .panel-right {
     right: 0 !important;
-    width: 245px !important;
-    max-width: 82vw !important;
+    width: 250px !important;
+    max-width: 48vw !important;
     border-left: 1px solid var(--border) !important;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.7) !important;
     transform: translateX(100%) !important;
   }
 
@@ -1568,13 +1521,13 @@ html, body {
     transform: translateX(0) !important;
   }
 
-  /* Desplazamiento dinámico de pestañas laterales cuando su panel está abierto */
+  /* Desplazamiento dinámico de los botones desplegables cuando el panel está abierto */
   .side-tab-left.is-open {
-    left: 235px !important;
+    left: 246px !important;
   }
 
   .side-tab-right.is-open {
-    right: 245px !important;
+    right: 256px !important;
   }
 
   .toolbar-bottom {
@@ -1597,18 +1550,6 @@ html, body {
 
   .toolbar-status-inline {
     display: none !important;
-  }
-
-  .canvas-view-controls {
-    top: 8px !important;
-    right: 8px !important;
-    z-index: 100 !important;
-  }
-
-  .btn-view-ctl {
-    width: 28px !important;
-    height: 28px !important;
-    font-size: 0.85rem !important;
   }
 }
 
