@@ -319,15 +319,13 @@
 
       <!-- Botón Limpiar Escena -->
       <button type="button" class="btn-tool btn-clear-scene" id="btn-clear-scene" data-i18n="btnClear" data-i18n-title="btnClearTitle">🗑️ Clear Scene</button>
-    </div>
 
-    <!-- Barra de Estado Inferior -->
-    <footer class="status-bar">
-      <div class="status-left">
-        <span id="status-msg" data-i18n="statusReady">Ready. Select or draw lenses on the canvas.</span>
+      <!-- Información de Estado y Coordenadas Integradas en la Toolbar -->
+      <div class="toolbar-status-inline">
+        <span class="status-msg-inline" id="status-msg" data-i18n="statusReady">Ready. Select or draw lenses on the canvas.</span>
+        <span class="status-coords-inline" id="lbl-coords">X: 0.0, Y: 0.0</span>
       </div>
-      <div class="status-coords" id="lbl-coords">X: 0.0, Y: 0.0</div>
-    </footer>
+    </div>
   </div>
 
   <!-- Modal About / Acerca de -->

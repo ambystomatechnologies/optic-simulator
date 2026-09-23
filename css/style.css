@@ -228,7 +228,6 @@ html, body {
 .toolbar-top {
   background-color: var(--bg-panel);
   border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -236,6 +235,41 @@ html, body {
   padding: 0.45rem 1rem;
   z-index: 90;
   flex-shrink: 0;
+  min-height: 44px;
+}
+
+/* Información de Estado y Coordenadas Integradas a la Derecha de Limpiar Escena */
+.toolbar-status-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  margin-left: 0.5rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--border);
+  gap: 0.75rem;
+  min-width: 200px;
+}
+
+.status-msg-inline {
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-coords-inline {
+  color: var(--accent);
+  font-family: monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: rgba(0, 255, 204, 0.08);
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 255, 204, 0.2);
+  margin-left: auto;
 }
 
 .toolbar-group {
@@ -673,32 +707,7 @@ html, body {
   margin-top: auto;
 }
 
-/* --- FOOTER & STATUS BAR --- */
-.status-bar {
-  height: 28px;
-  background-color: var(--bg-panel);
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 1rem;
-  font-size: 0.76rem;
-  color: var(--text-dim);
-  z-index: 80;
-  flex-shrink: 0;
-}
 
-.status-left {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.status-coords {
-  color: var(--accent);
-  font-family: monospace;
-  font-size: 0.78rem;
-}
 
 /* --- MODAL ABOUT --- */
 .modal-overlay {
