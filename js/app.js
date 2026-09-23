@@ -1154,49 +1154,71 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- CONTROLES DE PANELES EN MÓVILES (DRAWERS) ---
+  // --- CONTROLES DE PANELES EN MÓVILES Y PESTAÑAS LATERALES DESPLEGABLES ---
   const btnToggleScene = document.getElementById('btn-toggle-scene');
   const btnToggleProps = document.getElementById('btn-toggle-props');
+  const sideTabLeft = document.getElementById('side-tab-left');
+  const sideTabRight = document.getElementById('side-tab-right');
+  const arrowTabLeft = document.getElementById('arrow-tab-left');
+  const arrowTabRight = document.getElementById('arrow-tab-right');
   const btnCloseSceneDrawer = document.getElementById('btn-close-scene-drawer');
   const btnClosePropsDrawer = document.getElementById('btn-close-props-drawer');
   const drawerBackdrop = document.getElementById('drawer-backdrop');
   const panelLeft = document.getElementById('panel-left');
   const panelRight = document.getElementById('panel-right');
 
+  function updateSideTabStates() {
+    const isLeftOpen = panelLeft && panelLeft.classList.contains('mobile-open');
+    const isRightOpen = panelRight && panelRight.classList.contains('mobile-open');
+
+    if (sideTabLeft) sideTabLeft.classList.toggle('is-open', Boolean(isLeftOpen));
+    if (arrowTabLeft) arrowTabLeft.textContent = isLeftOpen ? '◀' : '▶';
+    if (btnToggleScene) btnToggleScene.classList.toggle('active', Boolean(isLeftOpen));
+
+    if (sideTabRight) sideTabRight.classList.toggle('is-open', Boolean(isRightOpen));
+    if (arrowTabRight) arrowTabRight.textContent = isRightOpen ? '▶' : '◀';
+    if (btnToggleProps) btnToggleProps.classList.toggle('active', Boolean(isRightOpen));
+
+    const zoomControls = document.querySelector('.canvas-view-controls');
+    if (zoomControls) {
+      zoomControls.classList.toggle('shifted', Boolean(isRightOpen));
+    }
+  }
+
+  function toggleLeftPanel() {
+    if (!panelLeft) return;
+    const willOpen = !panelLeft.classList.contains('mobile-open');
+    panelLeft.classList.toggle('mobile-open', willOpen);
+    updateSideTabStates();
+  }
+
+  function toggleRightPanel() {
+    if (!panelRight) return;
+    const willOpen = !panelRight.classList.contains('mobile-open');
+    panelRight.classList.toggle('mobile-open', willOpen);
+    updateSideTabStates();
+  }
+
   function closeMobileDrawers() {
     if (panelLeft) panelLeft.classList.remove('mobile-open');
     if (panelRight) panelRight.classList.remove('mobile-open');
-    if (btnToggleScene) btnToggleScene.classList.remove('active');
-    if (btnToggleProps) btnToggleProps.classList.remove('active');
-    if (drawerBackdrop) drawerBackdrop.classList.remove('active');
+    updateSideTabStates();
   }
 
-  if (btnToggleScene && panelLeft) {
-    btnToggleScene.addEventListener('click', () => {
-      const isOpen = panelLeft.classList.contains('mobile-open');
-      closeMobileDrawers();
-      if (!isOpen) {
-        panelLeft.classList.add('mobile-open');
-        btnToggleScene.classList.add('active');
-        if (drawerBackdrop) drawerBackdrop.classList.add('active');
-      }
-    });
-  }
+  if (btnToggleScene) btnToggleScene.addEventListener('click', toggleLeftPanel);
+  if (sideTabLeft) sideTabLeft.addEventListener('click', toggleLeftPanel);
 
-  if (btnToggleProps && panelRight) {
-    btnToggleProps.addEventListener('click', () => {
-      const isOpen = panelRight.classList.contains('mobile-open');
-      closeMobileDrawers();
-      if (!isOpen) {
-        panelRight.classList.add('mobile-open');
-        btnToggleProps.classList.add('active');
-        if (drawerBackdrop) drawerBackdrop.classList.add('active');
-      }
-    });
-  }
+  if (btnToggleProps) btnToggleProps.addEventListener('click', toggleRightPanel);
+  if (sideTabRight) sideTabRight.addEventListener('click', toggleRightPanel);
 
-  if (btnCloseSceneDrawer) btnCloseSceneDrawer.addEventListener('click', closeMobileDrawers);
-  if (btnClosePropsDrawer) btnClosePropsDrawer.addEventListener('click', closeMobileDrawers);
+  if (btnCloseSceneDrawer) btnCloseSceneDrawer.addEventListener('click', () => {
+    if (panelLeft) panelLeft.classList.remove('mobile-open');
+    updateSideTabStates();
+  });
+  if (btnClosePropsDrawer) btnClosePropsDrawer.addEventListener('click', () => {
+    if (panelRight) panelRight.classList.remove('mobile-open');
+    updateSideTabStates();
+  });
   if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeMobileDrawers);
 
   // --- CONTROL DE VISTA HORIZONTAL OBLIGATORIA EN MÓVILES ---

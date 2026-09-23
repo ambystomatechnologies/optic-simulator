@@ -972,6 +972,66 @@ html, body {
   box-shadow: 0 0 10px var(--accent-glow);
 }
 
+/* Pestañas Laterales Desplegables para Móvil y Pantallas Horizontales */
+.side-tab-toggle {
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(23, 25, 38, 0.94);
+  border: 1.5px solid var(--accent);
+  color: var(--accent);
+  font-family: var(--font-main);
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.55rem 0.65rem;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 16px rgba(0, 255, 204, 0.35);
+  z-index: 175;
+  align-items: center;
+  gap: 0.35rem;
+  user-select: none;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.side-tab-toggle:hover {
+  background: var(--accent);
+  color: #0f111a;
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.side-tab-left {
+  left: 0;
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+}
+
+.side-tab-left.is-open {
+  left: 235px;
+  background: rgba(0, 255, 204, 0.2);
+}
+
+.side-tab-right {
+  right: 0;
+  border-right: none;
+  border-radius: 10px 0 0 10px;
+}
+
+.side-tab-right.is-open {
+  right: 245px;
+  background: rgba(0, 255, 204, 0.2);
+}
+
+.tab-icon {
+  font-size: 0.95rem;
+}
+
+.tab-arrow {
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
 /* Cabeceras de Drawer dentro de los paneles en Móvil */
 .mobile-drawer-header {
   display: none;
@@ -1424,7 +1484,12 @@ html, body {
 /* ==========================================================================
    VISTA HORIZONTAL MÓVIL (LANDSCAPE ERGONÓMICO EN SMARTPHONES)
    ========================================================================== */
-@media (max-height: 520px) {
+@media (max-height: 520px), (max-width: 900px) {
+  /* Mostrar pestañas laterales en los bordes del canvas */
+  .side-tab-toggle {
+    display: flex !important;
+  }
+
   .header-navbar {
     height: 40px !important;
     min-height: 40px !important;
@@ -1463,23 +1528,53 @@ html, body {
     font-size: 0.72rem !important;
   }
 
-  /* Ocultar panel derecho permanente en landscape móvil para que no tape el canvas */
+  /* Barras laterales colapsables / desplegables */
+  .panel-left,
   .panel-right {
-    display: none !important;
-  }
-
-  .panel-left {
-    display: none !important;
-  }
-
-  .panel-left.mobile-open,
-  .panel-right.mobile-open {
     display: flex !important;
     position: fixed !important;
     top: 40px !important;
-    bottom: 0 !important;
-    z-index: 180 !important;
-    width: min(300px, 80vw) !important;
+    bottom: 38px !important;
+    z-index: 185 !important;
+    background: rgba(23, 25, 38, 0.97) !important;
+    backdrop-filter: blur(12px) !important;
+    box-shadow: 0 0 35px rgba(0, 0, 0, 0.9), 0 0 15px rgba(0, 255, 204, 0.15) !important;
+    overflow-y: auto !important;
+    padding: 0.5rem 0.65rem 1rem !important;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  .panel-left {
+    left: 0 !important;
+    width: 235px !important;
+    max-width: 80vw !important;
+    border-right: 1px solid var(--border) !important;
+    transform: translateX(-100%) !important;
+  }
+
+  .panel-left.mobile-open {
+    transform: translateX(0) !important;
+  }
+
+  .panel-right {
+    right: 0 !important;
+    width: 245px !important;
+    max-width: 82vw !important;
+    border-left: 1px solid var(--border) !important;
+    transform: translateX(100%) !important;
+  }
+
+  .panel-right.mobile-open {
+    transform: translateX(0) !important;
+  }
+
+  /* Desplazamiento dinámico de pestañas laterales cuando su panel está abierto */
+  .side-tab-left.is-open {
+    left: 235px !important;
+  }
+
+  .side-tab-right.is-open {
+    right: 245px !important;
   }
 
   .toolbar-bottom {
@@ -1507,6 +1602,7 @@ html, body {
   .canvas-view-controls {
     top: 8px !important;
     right: 8px !important;
+    z-index: 100 !important;
   }
 
   .btn-view-ctl {
