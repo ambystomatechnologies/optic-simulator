@@ -370,7 +370,8 @@ class LightSource {
     const dir = this.getDirectionVector();
     const perp = [-dir[1], dir[0]];
 
-    // Si es Haz de Luz Blanca: 7 colores espectrales distribuidos a lo largo del frente del haz grueso
+    // Si es Haz de Luz Blanca Policromática:
+    // La física óptica real establece que la luz blanca contiene las 7 longitudes de onda en CADA punto del haz.
     if (this.isWhiteLight) {
       const rainbowWls = window.RAINBOW_7_WAVELENGTHS || [680.0, 610.0, 580.0, 535.0, 495.0, 450.0, 405.0];
       const rainbowCols = window.RAINBOW_7_COLORS || [
@@ -384,17 +385,30 @@ class LightSource {
       ];
 
       const count = Math.max(1, this.rayCount || 11);
-      const halfW = count > 1 ? Math.min(24.0, 0.8 + count * 0.42) : 0;
+      const halfW = count > 1 ? Math.min(30.0, 1.0 + count * 0.7) : 0;
 
-      for (let i = 0; i < rainbowWls.length; i++) {
-        const wl = rainbowWls[i];
-        const col = rainbowCols[i] || wavelengthToRGB(wl);
-        const offset = halfW > 0 ? -halfW + (2.0 * halfW * i) / (rainbowWls.length - 1) : 0;
+      // Líneas espaciales a lo largo del grosor del haz de luz blanca
+      const numSamples = halfW > 0 ? Math.min(13, Math.max(5, Math.floor(count / 2) * 2 + 1)) : 1;
+
+      for (let s = 0; s < numSamples; s++) {
+        const offset = numSamples > 1
+          ? -halfW + (2.0 * halfW * s) / (numSamples - 1)
+          : 0;
         const origin = [
           this.position[0] + perp[0] * offset,
           this.position[1] + perp[1] * offset
         ];
-        rays.push(new Ray(origin, dir, wl, 1.0, 0, col, true));
+
+        // En CADA línea espacial del haz blanco se emite el espectro completo (7 colores)
+        for (let i = 0; i < rainbowWls.length; i++) {
+          const wl = rainbowWls[i];
+          const col = rainbowCols[i] || wavelengthToRGB(wl);
+          const ray = new Ray(origin, dir, wl, 1.0, 0, col, true);
+          ray.spatialSampleIdx = s;
+          ray.totalSamples = numSamples;
+          ray.beamHalfWidth = halfW;
+          rays.push(ray);
+        }
       }
       return rays;
     }

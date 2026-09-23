@@ -894,7 +894,7 @@ class OpticsCanvasController {
       const rays = src.generateRays();
 
       if (src.isWhiteLight) {
-        // Trazar los 7 rayos espectrales de Newton
+        // Trazar todos los rayos policromáticos de la luz blanca
         const rayPaths = [];
         for (let r = 0; r < rays.length; r++) {
           const ray = rays[r];
@@ -902,69 +902,83 @@ class OpticsCanvasController {
           rayPaths.push({ ray, path });
         }
 
-        // 1. Dibujar el Haz Incidente Blanco Grueso (tramo 0: desde el emisor hasta el primer impacto o infinito)
         const count = src.rayCount || 11;
-        const beamThickness = Math.max(3.0, 2.0 + count * 0.95);
-        const glowBlur = Math.min(32, 8 + beamThickness * 0.6);
+        const halfW = count > 1 ? Math.min(30.0, 1.0 + count * 0.7) : 0;
+        const numSamples = rays[0] && rays[0].totalSamples ? rays[0].totalSamples : 1;
+        const lineSpacing = numSamples > 1 ? (2.0 * halfW) / (numSamples - 1) : 0;
+        const beamLineThick = Math.max(2.6, lineSpacing + 2.0);
 
-        if (rayPaths.length > 0 && rayPaths[0].path.length >= 2) {
-          const midIdx = Math.floor(rayPaths.length / 2);
-          const p0 = rayPaths[midIdx].path[0];
-          const p1 = rayPaths[midIdx].path[1];
-          const s0 = this.worldToScreen(p0[0], p0[1]);
-          const s1 = this.worldToScreen(p1[0], p1[1]);
-
-          ctx.save();
-          // Halo de resplandor blanco exterior
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-          ctx.shadowColor = 'rgba(255, 255, 255, 0.95)';
-          ctx.shadowBlur = glowBlur;
-          ctx.lineWidth = beamThickness + 5;
-          ctx.beginPath();
-          ctx.moveTo(s0.x, s0.y);
-          ctx.lineTo(s1.x, s1.y);
-          ctx.stroke();
-
-          // Cuerpo sólido del haz blanco con el grosor seleccionado por el slider
-          ctx.strokeStyle = '#ffffff';
-          ctx.shadowBlur = Math.min(16, 4 + beamThickness * 0.3);
-          ctx.lineWidth = beamThickness;
-          ctx.beginPath();
-          ctx.moveTo(s0.x, s0.y);
-          ctx.lineTo(s1.x, s1.y);
-          ctx.stroke();
-
-          // Núcleo central hiperbrillante
-          ctx.strokeStyle = '#ffffff';
-          ctx.shadowBlur = 0;
-          ctx.lineWidth = Math.max(2.0, beamThickness * 0.35);
-          ctx.beginPath();
-          ctx.moveTo(s0.x, s0.y);
-          ctx.lineTo(s1.x, s1.y);
-          ctx.stroke();
-          ctx.restore();
-        }
-
-        // 2. Dibujar las Refracciones Espectrales en los 7 Colores del Arcoíris (a partir del primer impacto en el cristal)
-        // Usar 'source-over' para que los 7 colores primarios se muestren vibrantes y puros sin quemarse aditivamente a blanco
+        // 1. Dibujar los tramos incidentes de luz blanca pura (tramo 0: desde el emisor p0 hasta el primer impacto p1)
+        // Agrupamos por línea espacial para renderizar el haz blanco continuo que viaja en el aire
+        const drawnSpatialSamples = new Set();
         ctx.save();
-        ctx.globalCompositeOperation = 'source-over';
 
-        // El grosor de los rayos refractados acompaña armónicamente el grosor de la fuente
-        const refrThickness = Math.max(2.8, beamThickness * 0.42);
+        // Capa de resplandor blanco exterior
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+        ctx.shadowColor = 'rgba(255, 255, 255, 0.95)';
+        ctx.shadowBlur = Math.min(22, 6 + beamLineThick * 0.6);
+        ctx.lineWidth = beamLineThick + 4;
+        ctx.lineCap = 'butt';
 
         for (let r = 0; r < rayPaths.length; r++) {
           const { ray, path } = rayPaths[r];
-          if (path.length <= 1) continue;
+          if (path.length < 2) continue;
+          const sIdx = ray.spatialSampleIdx !== undefined ? ray.spatialSampleIdx : r;
+          if (drawnSpatialSamples.has(sIdx)) continue;
+          drawnSpatialSamples.add(sIdx);
+
+          const s0 = this.worldToScreen(path[0][0], path[0][1]);
+          const s1 = this.worldToScreen(path[1][0], path[1][1]);
+
+          ctx.beginPath();
+          ctx.moveTo(s0.x, s0.y);
+          ctx.lineTo(s1.x, s1.y);
+          ctx.stroke();
+        }
+
+        // Núcleo blanco sólido puro
+        ctx.strokeStyle = '#ffffff';
+        ctx.shadowBlur = 0;
+        ctx.lineWidth = beamLineThick;
+        drawnSpatialSamples.clear();
+
+        for (let r = 0; r < rayPaths.length; r++) {
+          const { ray, path } = rayPaths[r];
+          if (path.length < 2) continue;
+          const sIdx = ray.spatialSampleIdx !== undefined ? ray.spatialSampleIdx : r;
+          if (drawnSpatialSamples.has(sIdx)) continue;
+          drawnSpatialSamples.add(sIdx);
+
+          const s0 = this.worldToScreen(path[0][0], path[0][1]);
+          const s1 = this.worldToScreen(path[1][0], path[1][1]);
+
+          ctx.beginPath();
+          ctx.moveTo(s0.x, s0.y);
+          ctx.lineTo(s1.x, s1.y);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // 2. Dibujar las refracciones espectrales en los 7 Colores del Arcoíris (a partir del primer impacto en cualquier medio óptico)
+        ctx.save();
+        ctx.globalCompositeOperation = 'source-over';
+        const refrThickness = Math.max(2.4, Math.min(5.0, 1.8 + beamLineThick * 0.28));
+
+        for (let r = 0; r < rayPaths.length; r++) {
+          const { ray, path } = rayPaths[r];
+          // Solo se dibuja refracción si el rayo impactó una figura y continuó su propagación (path.length > 2)
+          if (path.length <= 2) continue;
 
           const rgb = ray.color;
           const colorStr = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-          const glowColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.8)`;
+          const glowColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.85)`;
 
           ctx.strokeStyle = colorStr;
           ctx.shadowColor = glowColor;
-          ctx.shadowBlur = Math.min(18, 4 + refrThickness * 0.5);
+          ctx.shadowBlur = 12;
           ctx.lineWidth = refrThickness;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
 
           ctx.beginPath();
           const startPt = this.worldToScreen(path[1][0], path[1][1]);
@@ -1135,8 +1149,12 @@ class OpticsCanvasController {
       ctx.shadowColor = 'rgba(0, 255, 204, 0.4)';
       ctx.shadowBlur = isSelected ? 12 : 6;
 
+      const count = src.rayCount || 11;
+      const beamHalfW = src.isWhiteLight 
+        ? (count > 1 ? Math.min(30.0, 1.0 + count * 0.7) : 0) 
+        : 0;
       const halfH = src.isWhiteLight 
-        ? Math.max(10, Math.min(28, (1.8 + (src.rayCount || 11) * 0.62) * 0.55)) 
+        ? Math.max(10, Math.min(36, beamHalfW + 4)) 
         : 10;
 
       ctx.beginPath();
