@@ -3,8 +3,19 @@
  * physics.js - Motor de Trazado de Rayos, Ley de Snell, Reflexión y Dispersión
  */
 
+// 7 Longitudes de onda del arcoíris canónico de Newton (Rojo, Naranja, Amarillo, Verde, Cian, Azul, Violeta)
+const RAINBOW_7_WAVELENGTHS = [
+  680.0, // Rojo (Red)
+  610.0, // Naranja (Orange)
+  580.0, // Amarillo (Yellow)
+  535.0, // Verde (Green)
+  495.0, // Cian (Cyan)
+  450.0, // Azul (Blue / Indigo)
+  405.0  // Violeta (Violet)
+];
+
 class Ray {
-  constructor(origin, direction, wavelength = 532.0, intensity = 1.0, depth = 0, color = null) {
+  constructor(origin, direction, wavelength = 532.0, intensity = 1.0, depth = 0, color = null, isWhiteLight = false) {
     this.origin = [origin[0], origin[1]];
     const dirNorm = Math.hypot(direction[0], direction[1]);
     if (dirNorm < 1e-12) {
@@ -15,6 +26,7 @@ class Ray {
     this.wavelength = parseFloat(wavelength); // nm (ej: 650 rojo, 532 verde, 450 azul)
     this.intensity = parseFloat(intensity);
     this.depth = parseInt(depth);
+    this.isWhiteLight = Boolean(isWhiteLight);
     this.color = color || wavelengthToRGB(this.wavelength);
     this.path = [[this.origin[0], this.origin[1]]];
   }
@@ -156,10 +168,12 @@ function reflectRay(inDir, normal) {
 /**
  * Ecuación de Cauchy para dispersión cromática (arcoíris).
  */
-function cauchyRefractiveIndex(baseN, wavelengthNm) {
+function cauchyRefractiveIndex(baseN, wavelengthNm, dispersionBoost = false) {
   const lambdaUm = wavelengthNm / 1000.0;
   const lambdaRefUm = 0.589;
-  const B = 0.0042 * (baseN - 1.0);
+  // Factor de dispersión Cauchy calibrado para separación visual nítida en pantalla
+  const coeff = dispersionBoost ? 0.0085 : 0.0045;
+  const B = coeff * (baseN - 1.0);
   const A = baseN - B / (lambdaRefUm * lambdaRefUm);
   return A + B / (lambdaUm * lambdaUm);
 }
@@ -245,7 +259,8 @@ function traceRayScene(ray, elements, maxBounces = 40, minIntensity = 0.01) {
     ray.wavelength,
     ray.intensity,
     ray.depth,
-    ray.color
+    ray.color,
+    ray.isWhiteLight
   );
   ray.path = [[currentRay.origin[0], currentRay.origin[1]]];
 
@@ -304,12 +319,13 @@ function traceRayScene(ray, elements, maxBounces = 40, minIntensity = 0.01) {
       ];
       currentRay.direction = newDir;
     } else {
-      if (hitElement && hitElement.dispersionEnabled) {
+      if (hitElement && (hitElement.dispersionEnabled || currentRay.isWhiteLight)) {
+        const isBoost = currentRay.isWhiteLight || hitElement.dispersionEnabled;
         if (n1 > 1.0003) {
-          n1 = cauchyRefractiveIndex(n1, currentRay.wavelength);
+          n1 = cauchyRefractiveIndex(n1, currentRay.wavelength, isBoost);
         }
         if (n2 > 1.0003) {
-          n2 = cauchyRefractiveIndex(n2, currentRay.wavelength);
+          n2 = cauchyRefractiveIndex(n2, currentRay.wavelength, isBoost);
         }
       }
 
@@ -330,6 +346,7 @@ function traceRayScene(ray, elements, maxBounces = 40, minIntensity = 0.01) {
 
 // Exportar globalmente
 window.Ray = Ray;
+window.RAINBOW_7_WAVELENGTHS = RAINBOW_7_WAVELENGTHS;
 window.wavelengthToRGB = wavelengthToRGB;
 window.raySegmentIntersection = raySegmentIntersection;
 window.refractRay = refractRay;

@@ -357,6 +357,7 @@ class LightSource {
     this.beamWidth = 40.0;
     this.apertureDeg = 30.0;
     this.sourceType = "laser"; // 'laser', 'fan', 'parallel', 'object'
+    this.isWhiteLight = false; // Haz de Luz Blanca Policromática (7 colores)
   }
 
   getDirectionVector() {
@@ -369,9 +370,15 @@ class LightSource {
     const dir = this.getDirectionVector();
     const perp = [-dir[1], dir[0]];
 
+    // 7 Longitudes de onda del arcoíris si es luz blanca, o longitud de onda única si es monocromática
+    const rainbowColors = window.RAINBOW_7_WAVELENGTHS || [680.0, 610.0, 580.0, 535.0, 495.0, 450.0, 405.0];
+    const wavelengthsToEmit = this.isWhiteLight ? rainbowColors : [this.wavelength];
+
     if (this.sourceType === "laser" || this.sourceType === "parallel") {
       if (this.rayCount === 1) {
-        rays.push(new Ray(this.position, dir, this.wavelength));
+        for (const wl of wavelengthsToEmit) {
+          rays.push(new Ray(this.position, dir, wl, 1.0, 0, null, this.isWhiteLight));
+        }
       } else {
         const halfW = this.beamWidth / 2.0;
         for (let i = 0; i < this.rayCount; i++) {
@@ -382,7 +389,9 @@ class LightSource {
             this.position[0] + perp[0] * off,
             this.position[1] + perp[1] * off
           ];
-          rays.push(new Ray(orig, dir, this.wavelength));
+          for (const wl of wavelengthsToEmit) {
+            rays.push(new Ray(orig, dir, wl, 1.0, 0, null, this.isWhiteLight));
+          }
         }
       }
     } else if (this.sourceType === "fan") {
@@ -393,7 +402,9 @@ class LightSource {
           ? (centerRad - halfA) + (2 * halfA * i) / (this.rayCount - 1)
           : centerRad;
         const d = [Math.cos(a), Math.sin(a)];
-        rays.push(new Ray(this.position, d, this.wavelength));
+        for (const wl of wavelengthsToEmit) {
+          rays.push(new Ray(this.position, d, wl, 1.0, 0, null, this.isWhiteLight));
+        }
       }
     } else if (this.sourceType === "object") {
       // Objeto lápiz emitiendo abanicos de rayos desde distintos puntos a lo largo de su altura
@@ -410,16 +421,18 @@ class LightSource {
           this.position[1] + perp[1] * pOff
         ];
 
-        // Variación de color según altura del lápiz (ej: punta roja, base azul)
         const normH = (pOff + halfH) / (2 * halfH);
-        const wl = 450.0 + normH * 200.0;
+        const wlSingle = 450.0 + normH * 200.0;
+        const wls = this.isWhiteLight ? rainbowColors : [wlSingle];
 
         for (let r = 0; r < raysPerPt; r++) {
           const a = raysPerPt > 1
             ? (centerRad - halfAngle) + (2 * halfAngle * r) / (raysPerPt - 1)
             : centerRad;
           const d = [Math.cos(a), Math.sin(a)];
-          rays.push(new Ray(orig, d, wl));
+          for (const wl of wls) {
+            rays.push(new Ray(orig, d, wl, 1.0, 0, null, this.isWhiteLight));
+          }
         }
       }
     }

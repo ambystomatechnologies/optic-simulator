@@ -216,6 +216,11 @@
             <input type="range" id="slider-wl" class="slider-custom" min="380" max="750" value="532">
             <div class="wl-preview-bar" id="color-wl-preview"></div>
           </div>
+
+          <label class="chk-row" style="margin-top: 0.65rem; background: rgba(255, 255, 255, 0.05); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.12);">
+            <input type="checkbox" id="chk-white-light">
+            <span style="font-weight: 700; color: #ffffff;" data-i18n="chkWhiteLight">🌈 White Light Beam (7 Colors)</span>
+          </label>
         </div>
 
         <!-- 4. Simulación Global -->
@@ -290,6 +295,7 @@
       <!-- Desplegable Agregar Fuentes de Luz -->
       <select id="cb-add-source" class="select-optics">
         <option value="" selected data-i18n="optAddSource">-- Add Light Source --</option>
+        <option value="white_laser" data-i18n="optSourceWhiteLaser">🌈 White Light Beam (7 Colors)</option>
         <option value="laser" data-i18n="optSourceLaser">Laser Beam</option>
         <option value="fan" data-i18n="optSourceFan">Point Source (Fan)</option>
         <option value="parallel" data-i18n="optSourceParallel">Parallel Beam</option>

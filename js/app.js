@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sliderWl = document.getElementById('slider-wl');
   const lblWlValue = document.getElementById('lbl-wl-value');
   const colorWlPreview = document.getElementById('color-wl-preview');
+  const chkWhiteLight = document.getElementById('chk-white-light');
 
   const chkGrid = document.getElementById('chk-grid');
   const chkAxis = document.getElementById('chk-axis');
@@ -206,7 +207,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const pos = [-250.0, ((nSrc * 35) % 180) - 70];
       let src = null;
 
-      if (val === 'laser') {
+      if (val === 'white_laser') {
+        src = new LightSource(pos, 0.0, window.t('optSourceWhiteLaser'));
+        src.sourceType = "laser";
+        src.rayCount = 1;
+        src.isWhiteLight = true;
+      } else if (val === 'laser') {
         src = new LightSource(pos, 0.0, "Haz Láser");
         src.sourceType = "laser";
         src.rayCount = 1;
@@ -367,14 +373,41 @@ document.addEventListener('DOMContentLoaded', () => {
   if (sliderWl) {
     sliderWl.addEventListener('input', () => {
       const wl = parseFloat(sliderWl.value);
-      if (lblWlValue) lblWlValue.textContent = `${wl} nm`;
+      const targetSrc = getTargetLightSource();
+      if (targetSrc) {
+        targetSrc.wavelength = wl;
+        targetSrc.isWhiteLight = false;
+        if (chkWhiteLight) chkWhiteLight.checked = false;
+      }
+      updateWlPreviewUI(targetSrc || { wavelength: wl, isWhiteLight: false });
+    });
+  }
+
+  if (chkWhiteLight) {
+    chkWhiteLight.addEventListener('change', () => {
+      const targetSrc = getTargetLightSource();
+      if (targetSrc) {
+        targetSrc.isWhiteLight = chkWhiteLight.checked;
+        updateWlPreviewUI(targetSrc);
+      }
+    });
+  }
+
+  function updateWlPreviewUI(src) {
+    if (!src) return;
+    if (src.isWhiteLight) {
+      if (lblWlValue) lblWlValue.textContent = window.t('lblWhiteRainbow');
+      if (colorWlPreview) {
+        colorWlPreview.style.background = 'linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #00ffff, #0055ff, #8b00ff)';
+      }
+    } else {
+      const wl = src.wavelength || 532.0;
+      if (lblWlValue) lblWlValue.textContent = `${Math.round(wl)} nm`;
       const rgb = wavelengthToRGB(wl);
       if (colorWlPreview) {
-        colorWlPreview.style.backgroundColor = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+        colorWlPreview.style.background = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
       }
-      const targetSrc = getTargetLightSource();
-      if (targetSrc) targetSrc.wavelength = wl;
-    });
+    }
   }
 
   if (chkGrid) {
@@ -431,11 +464,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (sliderWl) {
         sliderWl.value = Math.round(elem.wavelength);
-        if (lblWlValue) lblWlValue.textContent = `${sliderWl.value} nm`;
-        const rgb = wavelengthToRGB(elem.wavelength);
-        if (colorWlPreview) {
-          colorWlPreview.style.backgroundColor = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-        }
+        updateWlPreviewUI(elem);
+      }
+      if (chkWhiteLight) {
+        chkWhiteLight.checked = Boolean(elem.isWhiteLight);
       }
       if (sliderRot) {
         sliderRot.value = Math.round(elem.angleDeg);
@@ -532,7 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const laser = new LightSource([-230.0, 0.0], 0.0, "Láser Blanco Multiespectral");
     laser.sourceType = "laser";
     laser.rayCount = 1;
-    laser.wavelength = 532.0;
+    laser.isWhiteLight = true;
     sim.addSource(laser);
 
     showToast(window.t('statusLoadedDemo', { name: window.t('optDemo1') }), 'info');

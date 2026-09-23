@@ -43,6 +43,7 @@ const OPTICS_I18N = {
     optScreen: "Detector Screen",
 
     optAddSource: "-- Add Light Source --",
+    optSourceWhiteLaser: "🌈 White Light Beam (7 Colors)",
     optSourceLaser: "Laser Beam",
     optSourceFan: "Point Source (Fan)",
     optSourceParallel: "Parallel Beam",
@@ -93,6 +94,8 @@ const OPTICS_I18N = {
     lblRayCount: "Ray Count:",
     lblSourceAngle: "Emission Angle:",
     lblWavelength: "Wavelength (nm):",
+    lblWhiteRainbow: "🌈 Rainbow (7 Colors)",
+    chkWhiteLight: "🌈 White Light Beam (7 Colors)",
     lblBeamWidth: "Beam Width:",
     lblAperture: "Aperture Angle:",
 
@@ -184,6 +187,7 @@ const OPTICS_I18N = {
     optScreen: "Pantalla / Detector",
 
     optAddSource: "-- Agregar Fuente de Luz --",
+    optSourceWhiteLaser: "🌈 Haz de Luz Blanca (7 Colores)",
     optSourceLaser: "Haz Láser",
     optSourceFan: "Fuente Puntual (Abanico)",
     optSourceParallel: "Haz Paralelo",
@@ -234,6 +238,8 @@ const OPTICS_I18N = {
     lblRayCount: "Cantidad de Rayos:",
     lblSourceAngle: "Ángulo de Emisión:",
     lblWavelength: "Longitud de Onda (nm):",
+    lblWhiteRainbow: "🌈 Arcoíris (7 Colores)",
+    chkWhiteLight: "🌈 Haz de Luz Blanca (7 Colores)",
     lblBeamWidth: "Ancho del Haz:",
     lblAperture: "Ángulo de Apertura:",
 

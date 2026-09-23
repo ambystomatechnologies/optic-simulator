@@ -650,7 +650,16 @@ class OpticsCanvasController {
       ctx.stroke();
 
       // Flecha de emisión en la punta
-      ctx.fillStyle = '#00ffcc';
+      if (src.isWhiteLight) {
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 10;
+      } else {
+        const rgb = wavelengthToRGB(src.wavelength);
+        ctx.fillStyle = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+        ctx.shadowColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.8)`;
+        ctx.shadowBlur = 8;
+      }
       ctx.beginPath();
       ctx.moveTo(4, -8);
       ctx.lineTo(14, 0);
