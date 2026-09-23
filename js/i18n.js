@@ -162,6 +162,12 @@ const OPTICS_I18N = {
     btnMobileProps: "⚙️ Settings",
     btnCloseDrawer: "✕ Close",
 
+    // Landscape orientation lock
+    landscapeTitle: "Rotate your device to landscape",
+    landscapeDesc: "The 2D Optics Simulator is designed for a widescreen landscape view to interact with light beams, lenses and prisms comfortably.",
+    landscapeDesktopNotice: "⚠️ For the best experience, we recommend accessing from your desktop computer.",
+    btnRotateRequest: "🔄 Switch to Fullscreen Landscape",
+
     // Footer
     footerCopy: "© 2026 Ambystoma Technologies · 2D Optics Simulator · Hosted on GitHub Pages",
     footerLink1: "Official Portal",
@@ -326,6 +332,12 @@ const OPTICS_I18N = {
     btnMobileScene: "📋 Escena",
     btnMobileProps: "⚙️ Ajustes",
     btnCloseDrawer: "✕ Cerrar",
+
+    // Bloqueo de orientación horizontal
+    landscapeTitle: "Gira tu teléfono horizontalmente",
+    landscapeDesc: "El Simulador de Óptica requiere vista panorámica (horizontal) para trazar rayos de luz, lentes y prismas con total comodidad.",
+    landscapeDesktopNotice: "⚠️ Para vivir la mejor experiencia te recomendamos entrar desde tu computadora de escritorio.",
+    btnRotateRequest: "🔄 Activar Pantalla Horizontal",
 
     // Footer
     footerCopy: "© 2026 Ambystoma Technologies · Simulador de Óptica 2D · Alojado en GitHub Pages",

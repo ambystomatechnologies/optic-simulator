@@ -1199,6 +1199,45 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnClosePropsDrawer) btnClosePropsDrawer.addEventListener('click', closeMobileDrawers);
   if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeMobileDrawers);
 
+  // --- CONTROL DE VISTA HORIZONTAL OBLIGATORIA EN MÓVILES ---
+  const landscapeOverlay = document.getElementById('landscape-lock-overlay');
+  const btnRequestLandscape = document.getElementById('btn-request-landscape');
+
+  function checkOrientationLock() {
+    if (!landscapeOverlay) return;
+    const isMobile = isMobileOrTabletDevice();
+    const isPortrait = window.innerHeight > window.innerWidth;
+    if (isMobile && isPortrait) {
+      landscapeOverlay.style.display = 'flex';
+    } else {
+      landscapeOverlay.style.display = 'none';
+      if (sim && typeof sim.resizeCanvas === 'function') {
+        sim.resizeCanvas();
+      }
+    }
+  }
+
+  if (btnRequestLandscape) {
+    btnRequestLandscape.addEventListener('click', async () => {
+      try {
+        if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+          await document.documentElement.requestFullscreen();
+        }
+        if (screen.orientation && screen.orientation.lock) {
+          await screen.orientation.lock('landscape');
+        }
+      } catch (err) {
+        // En navegadores que requieren giro físico del usuario
+      }
+    });
+  }
+
+  window.addEventListener('resize', checkOrientationLock);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(checkOrientationLock, 150);
+  });
+  checkOrientationLock();
+
   // Escuchar cambio de idioma
   window.addEventListener('languageChanged', () => {
     updateSceneList();

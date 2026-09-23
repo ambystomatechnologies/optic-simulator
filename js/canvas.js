@@ -103,6 +103,57 @@ class OpticsCanvasController {
     return [wx, wy];
   }
 
+  findClosestNode(worldPos, maxDistPixels = 48.0) {
+    const threshold = maxDistPixels / this.zoomLevel;
+    let closestElem = null;
+    let closestIdx = -1;
+    let minD = Infinity;
+
+    // Probar primero en el elemento seleccionado si existe
+    if (this.selectedElement) {
+      const elem = this.selectedElement;
+      const pts = (elem instanceof CustomLens)
+        ? elem.controlPoints
+        : (elem instanceof FlatMirror || elem instanceof DetectorScreen)
+          ? [elem.p1, elem.p2]
+          : [];
+      for (let i = 0; i < pts.length; i++) {
+        const d = Math.hypot(worldPos[0] - pts[i][0], worldPos[1] - pts[i][1]);
+        if (d < minD && d < threshold) {
+          minD = d;
+          closestElem = elem;
+          closestIdx = i;
+        }
+      }
+      if (closestElem) {
+        return { element: closestElem, nodeIdx: closestIdx, dist: minD };
+      }
+    }
+
+    // Probar en los demás elementos de la escena
+    for (let j = this.elements.length - 1; j >= 0; j--) {
+      const elem = this.elements[j];
+      const pts = (elem instanceof CustomLens)
+        ? elem.controlPoints
+        : (elem instanceof FlatMirror || elem instanceof DetectorScreen)
+          ? [elem.p1, elem.p2]
+          : [];
+      for (let i = 0; i < pts.length; i++) {
+        const d = Math.hypot(worldPos[0] - pts[i][0], worldPos[1] - pts[i][1]);
+        if (d < minD && d < threshold) {
+          minD = d;
+          closestElem = elem;
+          closestIdx = i;
+        }
+      }
+    }
+
+    if (closestElem) {
+      return { element: closestElem, nodeIdx: closestIdx, dist: minD };
+    }
+    return null;
+  }
+
   setMode(mode) {
     this.mode = mode;
     this.drawPoints = [];
@@ -289,63 +340,16 @@ class OpticsCanvasController {
           this.selectElement(null);
         }
       } else if (this.mode === CanvasMode.NODE_EDIT) {
-        const hitRadius = 16.0 / this.zoomLevel;
-        this.selectedNodeIdx = -1;
-
-        // 1. Probar si se hizo clic directamente en un nodo del elemento actualmente seleccionado
-        if (this.selectedElement instanceof CustomLens) {
-          const pts = this.selectedElement.controlPoints;
-          for (let i = 0; i < pts.length; i++) {
-            const dist = Math.hypot(worldPos[0] - pts[i][0], worldPos[1] - pts[i][1]);
-            if (dist < hitRadius) {
-              this.selectedNodeIdx = i;
-              this.isDraggingElement = true;
-              return;
-            }
-          }
-        } else if (this.selectedElement instanceof FlatMirror || this.selectedElement instanceof DetectorScreen) {
-          const pts = [this.selectedElement.p1, this.selectedElement.p2];
-          for (let i = 0; i < pts.length; i++) {
-            const dist = Math.hypot(worldPos[0] - pts[i][0], worldPos[1] - pts[i][1]);
-            if (dist < hitRadius) {
-              this.selectedNodeIdx = i;
-              this.isDraggingElement = true;
-              return;
-            }
-          }
+        // 1. Probar primero si el clic o toque está cerca de cualquier nodo interactivo (48px de tolerancia)
+        const nodeHit = this.findClosestNode(worldPos, 48.0);
+        if (nodeHit) {
+          this.selectElement(nodeHit.element);
+          this.selectedNodeIdx = nodeHit.nodeIdx;
+          this.isDraggingElement = true;
+          return;
         }
 
-        // 2. Probar si se hizo clic directamente en un nodo de CUALQUIER OTRA figura en la escena
-        for (let j = this.elements.length - 1; j >= 0; j--) {
-          const elem = this.elements[j];
-          if (elem === this.selectedElement) continue;
-
-          if (elem instanceof CustomLens) {
-            const pts = elem.controlPoints;
-            for (let i = 0; i < pts.length; i++) {
-              const dist = Math.hypot(worldPos[0] - pts[i][0], worldPos[1] - pts[i][1]);
-              if (dist < hitRadius) {
-                this.selectElement(elem);
-                this.selectedNodeIdx = i;
-                this.isDraggingElement = true;
-                return;
-              }
-            }
-          } else if (elem instanceof FlatMirror || elem instanceof DetectorScreen) {
-            const pts = [elem.p1, elem.p2];
-            for (let i = 0; i < pts.length; i++) {
-              const dist = Math.hypot(worldPos[0] - pts[i][0], worldPos[1] - pts[i][1]);
-              if (dist < hitRadius) {
-                this.selectElement(elem);
-                this.selectedNodeIdx = i;
-                this.isDraggingElement = true;
-                return;
-              }
-            }
-          }
-        }
-
-        // 3. Probar si se hizo clic dentro o sobre los bordes de CUALQUIER figura óptica para seleccionarla y activar sus nodos
+        // 2. Si no tocó directamente un nodo, probar si hizo clic dentro del cuerpo de una figura óptica
         let hitFound = null;
         for (let j = this.elements.length - 1; j >= 0; j--) {
           const elem = this.elements[j];
@@ -354,19 +358,18 @@ class OpticsCanvasController {
               hitFound = elem;
               break;
             }
-            // Probar cercanía a los bordes de la lente
             const bpts = elem.boundaryPoints;
             for (let i = 0; i < bpts.length; i++) {
               const p1 = bpts[i];
               const p2 = bpts[(i + 1) % bpts.length];
-              if (this.isPointNearSegment(worldPos, p1, p2, 14.0 / this.zoomLevel)) {
+              if (this.isPointNearSegment(worldPos, p1, p2, 22.0 / this.zoomLevel)) {
                 hitFound = elem;
                 break;
               }
             }
             if (hitFound) break;
           } else if (elem instanceof FlatMirror || elem instanceof DetectorScreen) {
-            if (this.isPointNearSegment(worldPos, elem.p1, elem.p2, 18.0 / this.zoomLevel)) {
+            if (this.isPointNearSegment(worldPos, elem.p1, elem.p2, 24.0 / this.zoomLevel)) {
               hitFound = elem;
               break;
             }
@@ -375,15 +378,22 @@ class OpticsCanvasController {
 
         if (hitFound) {
           this.selectElement(hitFound);
-          this.selectedNodeIdx = -1;
+          // Si tocó la figura cerca de una esquina (hasta 65px), enganchar de una vez el nodo para que pueda deformarlo de inmediato
+          const nearNode = this.findClosestNode(worldPos, 65.0);
+          if (nearNode && nearNode.element === hitFound) {
+            this.selectedNodeIdx = nearNode.nodeIdx;
+            this.isDraggingElement = true;
+          } else {
+            this.selectedNodeIdx = -1;
+          }
           return;
         }
 
-        // 4. Probar si se hizo clic en una fuente de luz
+        // 3. Probar si se hizo clic en una fuente de luz
         for (let i = this.sources.length - 1; i >= 0; i--) {
           const src = this.sources[i];
           const dist = Math.hypot(worldPos[0] - src.position[0], worldPos[1] - src.position[1]);
-          if (dist < 28.0 / this.zoomLevel) {
+          if (dist < 32.0 / this.zoomLevel) {
             this.selectElement(src);
             return;
           }
@@ -582,76 +592,50 @@ class OpticsCanvasController {
           this.selectElement(null);
           this.isPanning = true;
         } else if (this.mode === CanvasMode.NODE_EDIT) {
-          const hitRadius = 34.0 / this.zoomLevel;
-          this.selectedNodeIdx = -1;
-
-          // Probar nodos del elemento seleccionado
-          if (this.selectedElement instanceof CustomLens) {
-            const pts = this.selectedElement.controlPoints;
-            for (let i = 0; i < pts.length; i++) {
-              if (Math.hypot(worldPos[0] - pts[i][0], worldPos[1] - pts[i][1]) < hitRadius) {
-                this.selectedNodeIdx = i;
-                this.isDraggingElement = true;
-                return;
-              }
-            }
-          } else if (this.selectedElement instanceof FlatMirror || this.selectedElement instanceof DetectorScreen) {
-            const pts = [this.selectedElement.p1, this.selectedElement.p2];
-            for (let i = 0; i < pts.length; i++) {
-              if (Math.hypot(worldPos[0] - pts[i][0], worldPos[1] - pts[i][1]) < hitRadius) {
-                this.selectedNodeIdx = i;
-                this.isDraggingElement = true;
-                return;
-              }
-            }
+          // 1. Probar si el toque táctil está cerca de algún nodo interactivo (52px de tolerancia para dedos)
+          const nodeHit = this.findClosestNode(worldPos, 52.0);
+          if (nodeHit) {
+            this.selectElement(nodeHit.element);
+            this.selectedNodeIdx = nodeHit.nodeIdx;
+            this.isDraggingElement = true;
+            return;
           }
 
-          // Probar nodos de otros elementos
-          for (let j = this.elements.length - 1; j >= 0; j--) {
-            const elem = this.elements[j];
-            if (elem === this.selectedElement) continue;
-
-            if (elem instanceof CustomLens) {
-              const pts = elem.controlPoints;
-              for (let i = 0; i < pts.length; i++) {
-                if (Math.hypot(worldPos[0] - pts[i][0], worldPos[1] - pts[i][1]) < hitRadius) {
-                  this.selectElement(elem);
-                  this.selectedNodeIdx = i;
-                  this.isDraggingElement = true;
-                  return;
-                }
-              }
-            } else if (elem instanceof FlatMirror || elem instanceof DetectorScreen) {
-              const pts = [elem.p1, elem.p2];
-              for (let i = 0; i < pts.length; i++) {
-                if (Math.hypot(worldPos[0] - pts[i][0], worldPos[1] - pts[i][1]) < hitRadius) {
-                  this.selectElement(elem);
-                  this.selectedNodeIdx = i;
-                  this.isDraggingElement = true;
-                  return;
-                }
-              }
-            }
-          }
-
-          // Probar selección de elemento en modo nodo
+          // 2. Si no tocó nodo directamente, probar selección de elemento en modo nodo
           let hitFound = null;
           for (let j = this.elements.length - 1; j >= 0; j--) {
             const elem = this.elements[j];
             if (elem instanceof CustomLens) {
               if (pointInPolygon(worldPos, elem.boundaryPoints)) { hitFound = elem; break; }
+              const bpts = elem.boundaryPoints;
+              for (let i = 0; i < bpts.length; i++) {
+                const p1 = bpts[i];
+                const p2 = bpts[(i + 1) % bpts.length];
+                if (this.isPointNearSegment(worldPos, p1, p2, 28.0 / this.zoomLevel)) {
+                  hitFound = elem;
+                  break;
+                }
+              }
+              if (hitFound) break;
             } else if (elem instanceof FlatMirror || elem instanceof DetectorScreen) {
-              if (this.isPointNearSegment(worldPos, elem.p1, elem.p2, 28.0 / this.zoomLevel)) { hitFound = elem; break; }
+              if (this.isPointNearSegment(worldPos, elem.p1, elem.p2, 32.0 / this.zoomLevel)) { hitFound = elem; break; }
             }
           }
 
           if (hitFound) {
             this.selectElement(hitFound);
-            this.selectedNodeIdx = -1;
+            // Enganchar el nodo más cercano si está a menos de 75px de distancia del dedo
+            const nearNode = this.findClosestNode(worldPos, 75.0);
+            if (nearNode && nearNode.element === hitFound) {
+              this.selectedNodeIdx = nearNode.nodeIdx;
+              this.isDraggingElement = true;
+            } else {
+              this.selectedNodeIdx = -1;
+            }
             return;
           }
 
-          // Panning si tocó fondo
+          // Panning si tocó fondo vacío
           this.isPanning = true;
         } else if (this.mode === CanvasMode.DRAW_FREEHAND) {
           this.isDrawing = true;
@@ -1201,68 +1185,64 @@ class OpticsCanvasController {
 
         if (elem instanceof CustomLens) {
           const pts = elem.controlPoints;
-          ctx.fillStyle = 'rgba(0, 255, 204, 0.45)';
-          ctx.strokeStyle = 'rgba(15, 17, 26, 0.75)';
-          ctx.lineWidth = 1.5;
+          ctx.fillStyle = '#00ffcc';
+          ctx.strokeStyle = '#0f111a';
+          ctx.lineWidth = 2.0;
           ctx.shadowBlur = 0;
           for (let i = 0; i < pts.length; i++) {
             const sp = this.worldToScreen(pts[i][0], pts[i][1]);
             ctx.beginPath();
-            ctx.arc(sp.x, sp.y, 4.0, 0, Math.PI * 2);
+            ctx.arc(sp.x, sp.y, 6.5, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
           }
         } else if (elem instanceof FlatMirror || elem instanceof DetectorScreen) {
           const pts = [elem.p1, elem.p2];
-          ctx.fillStyle = 'rgba(56, 189, 248, 0.45)';
-          ctx.strokeStyle = 'rgba(15, 17, 26, 0.75)';
-          ctx.lineWidth = 1.5;
+          ctx.fillStyle = '#38bdf8';
+          ctx.strokeStyle = '#0f111a';
+          ctx.lineWidth = 2.0;
           ctx.shadowBlur = 0;
           for (let i = 0; i < pts.length; i++) {
             const sp = this.worldToScreen(pts[i][0], pts[i][1]);
             ctx.beginPath();
-            ctx.arc(sp.x, sp.y, 4.0, 0, Math.PI * 2);
+            ctx.arc(sp.x, sp.y, 6.5, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
           }
         }
       }
 
-      // 1B. Nodos interactivos destacados para la figura SELECCIONADA
+      // 1B. Nodos interactivos destacados para la figura SELECCIONADA (tamaño ergonómico para dedo y ratón)
+      const renderHighlightedNodes = (pts) => {
+        for (let i = 0; i < pts.length; i++) {
+          const sp = this.worldToScreen(pts[i][0], pts[i][1]);
+          const isSelectedNode = (i === this.selectedNodeIdx);
+
+          // Halo exterior táctil
+          ctx.beginPath();
+          ctx.arc(sp.x, sp.y, isSelectedNode ? 24.0 : 18.0, 0, Math.PI * 2);
+          ctx.fillStyle = isSelectedNode ? 'rgba(255, 85, 119, 0.35)' : 'rgba(0, 255, 204, 0.22)';
+          ctx.fill();
+
+          // Círculo central interactivo
+          ctx.fillStyle = isSelectedNode ? '#ff5577' : '#ffe600';
+          ctx.strokeStyle = '#0f111a';
+          ctx.lineWidth = 3.0;
+          ctx.shadowColor = isSelectedNode ? 'rgba(255, 85, 119, 0.95)' : 'rgba(255, 230, 0, 0.9)';
+          ctx.shadowBlur = 12;
+
+          ctx.beginPath();
+          ctx.arc(sp.x, sp.y, isSelectedNode ? 13.0 : 10.0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+        }
+      };
+
       if (this.selectedElement instanceof CustomLens) {
-        const pts = this.selectedElement.controlPoints;
-        for (let i = 0; i < pts.length; i++) {
-          const sp = this.worldToScreen(pts[i][0], pts[i][1]);
-          const isSelectedNode = (i === this.selectedNodeIdx);
-
-          ctx.fillStyle = isSelectedNode ? '#ff5577' : '#ffe600';
-          ctx.strokeStyle = '#0f111a';
-          ctx.lineWidth = 2.5;
-          ctx.shadowColor = isSelectedNode ? 'rgba(255, 85, 119, 0.95)' : 'rgba(255, 230, 0, 0.8)';
-          ctx.shadowBlur = 10;
-
-          ctx.beginPath();
-          ctx.arc(sp.x, sp.y, isSelectedNode ? 8.0 : 6.0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.stroke();
-        }
+        renderHighlightedNodes(this.selectedElement.controlPoints);
       } else if (this.selectedElement instanceof FlatMirror || this.selectedElement instanceof DetectorScreen) {
-        const pts = [this.selectedElement.p1, this.selectedElement.p2];
-        for (let i = 0; i < pts.length; i++) {
-          const sp = this.worldToScreen(pts[i][0], pts[i][1]);
-          const isSelectedNode = (i === this.selectedNodeIdx);
-
-          ctx.fillStyle = isSelectedNode ? '#ff5577' : '#ffe600';
-          ctx.strokeStyle = '#0f111a';
-          ctx.lineWidth = 2.5;
-          ctx.shadowColor = isSelectedNode ? 'rgba(255, 85, 119, 0.95)' : 'rgba(255, 230, 0, 0.8)';
-          ctx.shadowBlur = 10;
-
-          ctx.beginPath();
-          ctx.arc(sp.x, sp.y, isSelectedNode ? 8.0 : 6.0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.stroke();
-        }
+        renderHighlightedNodes([this.selectedElement.p1, this.selectedElement.p2]);
       }
     }
 

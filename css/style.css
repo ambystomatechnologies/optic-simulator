@@ -1291,3 +1291,228 @@ html, body {
     font-size: 1.05rem;
   }
 }
+
+/* ==========================================================================
+   BLOQUEO / OBLIGATORIEDAD DE VISTA HORIZONTAL EN MÓVILES
+   ========================================================================== */
+
+.landscape-lock-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, #171926 0%, #090b12 100%);
+  z-index: 999999;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+/* Solo se activa si la pantalla es móvil Y está en orientación vertical (portrait) */
+@media (max-width: 900px) and (orientation: portrait) {
+  .landscape-lock-overlay {
+    display: flex !important;
+  }
+}
+
+.landscape-lock-card {
+  max-width: 380px;
+  background: rgba(23, 25, 38, 0.95);
+  border: 1px solid rgba(0, 255, 204, 0.35);
+  border-radius: 20px;
+  padding: 2rem 1.5rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 255, 204, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.landscape-phone-animation {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone-anim-body {
+  width: 32px;
+  height: 54px;
+  border: 3px solid var(--accent);
+  border-radius: 7px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: rotatePhone 2.5s infinite ease-in-out;
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+}
+
+.phone-anim-screen {
+  width: 80%;
+  height: 80%;
+  background: rgba(0, 255, 204, 0.12);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone-laser-dot {
+  width: 6px;
+  height: 6px;
+  background: #ff5577;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #ff5577;
+}
+
+.phone-anim-arrow {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 1.4rem;
+  color: var(--accent);
+  animation: spinArrow 2.5s infinite linear;
+}
+
+@keyframes rotatePhone {
+  0%, 20% { transform: rotate(0deg); }
+  50%, 75% { transform: rotate(90deg); }
+  90%, 100% { transform: rotate(0deg); }
+}
+
+@keyframes spinArrow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.landscape-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 0.25rem;
+}
+
+.landscape-desc {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  line-height: 1.45;
+}
+
+.landscape-desktop-notice {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(0, 255, 204, 0.08);
+  border: 1px solid rgba(0, 255, 204, 0.25);
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  line-height: 1.4;
+}
+
+.btn-rotate-request {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  border-radius: 10px;
+}
+
+/* ==========================================================================
+   VISTA HORIZONTAL MÓVIL (LANDSCAPE ERGONÓMICO EN SMARTPHONES)
+   ========================================================================== */
+@media (max-height: 520px) {
+  .header-navbar {
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 0.75rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .navbar-logo-img {
+    height: 24px !important;
+  }
+
+  .brand-text h1 {
+    font-size: 0.82rem !important;
+  }
+
+  .brand-text p {
+    display: none !important;
+  }
+
+  .header-ad-zone {
+    display: none !important;
+  }
+
+  .badge-security {
+    display: none !important;
+  }
+
+  .btn-nav-about {
+    padding: 0.2rem 0.5rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  .btn-nav-mobile-toggle {
+    display: inline-flex !important;
+    padding: 0.2rem 0.5rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  /* Ocultar panel derecho permanente en landscape móvil para que no tape el canvas */
+  .panel-right {
+    display: none !important;
+  }
+
+  .panel-left {
+    display: none !important;
+  }
+
+  .panel-left.mobile-open,
+  .panel-right.mobile-open {
+    display: flex !important;
+    position: fixed !important;
+    top: 40px !important;
+    bottom: 0 !important;
+    z-index: 180 !important;
+    width: min(300px, 80vw) !important;
+  }
+
+  .toolbar-bottom {
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0.2rem 0.5rem !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 0.35rem !important;
+  }
+
+  .btn-tool,
+  .select-optics {
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 0.15rem 0.55rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .toolbar-status-inline {
+    display: none !important;
+  }
+
+  .canvas-view-controls {
+    top: 8px !important;
+    right: 8px !important;
+  }
+
+  .btn-view-ctl {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.85rem !important;
+  }
+}
+
