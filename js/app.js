@@ -137,9 +137,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (btnFinishDraw) {
+    btnFinishDraw.disabled = true;
     btnFinishDraw.addEventListener('click', () => {
       sim.finishCurrentDrawing();
-      setActiveToolButton(btnSelect);
     });
   }
 
@@ -748,6 +748,10 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (mode === CanvasMode.DRAW_FREEHAND) setActiveToolButton(btnDrawFreehand);
     else if (mode === CanvasMode.DRAW_POLYGON) setActiveToolButton(btnDrawPoly);
     else if (mode === CanvasMode.RULER) setActiveToolButton(btnRuler);
+
+    if (btnFinishDraw) {
+      btnFinishDraw.disabled = (mode !== CanvasMode.DRAW_POLYGON);
+    }
   };
 
   // --- LISTA DE ELEMENTOS DE LA ESCENA (PANEL IZQUIERDO) ---

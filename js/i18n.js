@@ -24,8 +24,8 @@ const OPTICS_I18N = {
     btnDrawFreehandTitle: "Draw a custom lens directly on canvas and smooth it into optics",
     btnDrawPoly: "📐 Custom Polygon",
     btnDrawPolyTitle: "Click points to define a custom prism or geometric lens",
-    btnFinishDraw: "✅ OK - Finish Drawing",
-    btnFinishDrawTitle: "Close current drawing and convert it into an interactive lens",
+    btnFinishDraw: "✅ Finish Polygon Drawing",
+    btnFinishDrawTitle: "Close current polygon and convert it into an interactive optical lens",
     btnRuler: "📏 Optical Ruler",
     btnRulerTitle: "Click and drag to measure distances and angles across the scene",
 
@@ -146,8 +146,8 @@ const OPTICS_I18N = {
     toast_scene_saved: "Scene configuration saved.",
     toast_scene_loaded: "Scene configuration loaded successfully.",
     toast_scene_load_error: "Error loading file: invalid scene format.",
-    toast_drawing_finished: "Custom lens successfully created!",
-    toast_drawing_min_points: "Please draw at least 3 points to form a closed lens.",
+    toast_drawing_finished: "Custom polygon lens successfully created!",
+    toast_drawing_min_points: "Please place at least 3 vertices to close the polygon.",
     toast_element_deleted: "Selected element removed.",
     confirm_clear: "Are you sure you want to clear the entire scene?",
 
@@ -178,8 +178,8 @@ const OPTICS_I18N = {
     btnDrawFreehandTitle: "Dibuja una lente libremente y conviértela en óptica suave",
     btnDrawPoly: "📐 Polígono Personalizado",
     btnDrawPolyTitle: "Haz clics para trazar un prisma o lente poligonal personalizada",
-    btnFinishDraw: "✅ OK - Finalizar Dibujo",
-    btnFinishDrawTitle: "Cierra el dibujo actual y conviértelo en una lente interactiva",
+    btnFinishDraw: "✅ Finalizar dibujo de polígono",
+    btnFinishDrawTitle: "Cierra el polígono actual y conviértelo en una lente interactiva",
     btnRuler: "📏 Regla / Medidor",
     btnRulerTitle: "Haz clic y arrastra para medir distancias y ángulos en el lienzo",
 
@@ -300,8 +300,8 @@ const OPTICS_I18N = {
     toast_scene_saved: "Configuración de escena guardada con éxito.",
     toast_scene_loaded: "Configuración de escena cargada con éxito.",
     toast_scene_load_error: "Error al abrir el archivo: formato de escena inválido.",
-    toast_drawing_finished: "¡Lente personalizada creada con éxito!",
-    toast_drawing_min_points: "Por favor dibuja al menos 3 puntos para cerrar la lente.",
+    toast_drawing_finished: "¡Lente poligonal creada con éxito!",
+    toast_drawing_min_points: "Por favor define al menos 3 vértices para cerrar el polígono.",
     toast_element_deleted: "Elemento seleccionado eliminado.",
     confirm_clear: "¿Estás seguro de que deseas vaciar toda la escena?",
 

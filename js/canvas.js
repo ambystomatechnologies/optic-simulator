@@ -96,6 +96,16 @@ class OpticsCanvasController {
     this.rulerP2 = null;
     this.selectedNodeIdx = -1;
 
+    // Si entramos en modo NODE_EDIT y no hay un elemento óptico seleccionado,
+    // seleccionar el último si existe en la escena para que sus nodos se puedan editar de inmediato
+    if (mode === CanvasMode.NODE_EDIT) {
+      if (!this.selectedElement || !(this.selectedElement instanceof CustomLens || this.selectedElement instanceof FlatMirror || this.selectedElement instanceof DetectorScreen)) {
+        if (this.elements.length > 0) {
+          this.selectElement(this.elements[this.elements.length - 1]);
+        }
+      }
+    }
+
     if (this.onModeChanged) {
       this.onModeChanged(mode);
     }
@@ -264,12 +274,12 @@ class OpticsCanvasController {
           this.selectElement(null);
         }
       } else if (this.mode === CanvasMode.NODE_EDIT) {
-        // Seleccionar nodo / vértice de lente personalizada
+        const hitRadius = 16.0 / this.zoomLevel;
+        this.selectedNodeIdx = -1;
+
+        // 1. Probar si se hizo clic directamente en un nodo del elemento actualmente seleccionado
         if (this.selectedElement instanceof CustomLens) {
           const pts = this.selectedElement.controlPoints;
-          const hitRadius = 14.0 / this.zoomLevel;
-          this.selectedNodeIdx = -1;
-
           for (let i = 0; i < pts.length; i++) {
             const dist = Math.hypot(worldPos[0] - pts[i][0], worldPos[1] - pts[i][1]);
             if (dist < hitRadius) {
@@ -277,6 +287,90 @@ class OpticsCanvasController {
               this.isDraggingElement = true;
               return;
             }
+          }
+        } else if (this.selectedElement instanceof FlatMirror || this.selectedElement instanceof DetectorScreen) {
+          const pts = [this.selectedElement.p1, this.selectedElement.p2];
+          for (let i = 0; i < pts.length; i++) {
+            const dist = Math.hypot(worldPos[0] - pts[i][0], worldPos[1] - pts[i][1]);
+            if (dist < hitRadius) {
+              this.selectedNodeIdx = i;
+              this.isDraggingElement = true;
+              return;
+            }
+          }
+        }
+
+        // 2. Probar si se hizo clic directamente en un nodo de CUALQUIER OTRA figura en la escena
+        for (let j = this.elements.length - 1; j >= 0; j--) {
+          const elem = this.elements[j];
+          if (elem === this.selectedElement) continue;
+
+          if (elem instanceof CustomLens) {
+            const pts = elem.controlPoints;
+            for (let i = 0; i < pts.length; i++) {
+              const dist = Math.hypot(worldPos[0] - pts[i][0], worldPos[1] - pts[i][1]);
+              if (dist < hitRadius) {
+                this.selectElement(elem);
+                this.selectedNodeIdx = i;
+                this.isDraggingElement = true;
+                return;
+              }
+            }
+          } else if (elem instanceof FlatMirror || elem instanceof DetectorScreen) {
+            const pts = [elem.p1, elem.p2];
+            for (let i = 0; i < pts.length; i++) {
+              const dist = Math.hypot(worldPos[0] - pts[i][0], worldPos[1] - pts[i][1]);
+              if (dist < hitRadius) {
+                this.selectElement(elem);
+                this.selectedNodeIdx = i;
+                this.isDraggingElement = true;
+                return;
+              }
+            }
+          }
+        }
+
+        // 3. Probar si se hizo clic dentro o sobre los bordes de CUALQUIER figura óptica para seleccionarla y activar sus nodos
+        let hitFound = null;
+        for (let j = this.elements.length - 1; j >= 0; j--) {
+          const elem = this.elements[j];
+          if (elem instanceof CustomLens) {
+            if (pointInPolygon(worldPos, elem.boundaryPoints)) {
+              hitFound = elem;
+              break;
+            }
+            // Probar cercanía a los bordes de la lente
+            const bpts = elem.boundaryPoints;
+            for (let i = 0; i < bpts.length; i++) {
+              const p1 = bpts[i];
+              const p2 = bpts[(i + 1) % bpts.length];
+              if (this.isPointNearSegment(worldPos, p1, p2, 14.0 / this.zoomLevel)) {
+                hitFound = elem;
+                break;
+              }
+            }
+            if (hitFound) break;
+          } else if (elem instanceof FlatMirror || elem instanceof DetectorScreen) {
+            if (this.isPointNearSegment(worldPos, elem.p1, elem.p2, 18.0 / this.zoomLevel)) {
+              hitFound = elem;
+              break;
+            }
+          }
+        }
+
+        if (hitFound) {
+          this.selectElement(hitFound);
+          this.selectedNodeIdx = -1;
+          return;
+        }
+
+        // 4. Probar si se hizo clic en una fuente de luz
+        for (let i = this.sources.length - 1; i >= 0; i--) {
+          const src = this.sources[i];
+          const dist = Math.hypot(worldPos[0] - src.position[0], worldPos[1] - src.position[1]);
+          if (dist < 28.0 / this.zoomLevel) {
+            this.selectElement(src);
+            return;
           }
         }
       } else if (this.mode === CanvasMode.DRAW_FREEHAND) {
@@ -329,6 +423,15 @@ class OpticsCanvasController {
             this.selectedElement.controlPoints[this.selectedNodeIdx][1] = worldPos[1];
             this.selectedElement.invalidateCache();
             this.notifySceneChanged();
+          } else if (this.selectedElement instanceof FlatMirror || this.selectedElement instanceof DetectorScreen) {
+            if (this.selectedNodeIdx === 0) {
+              this.selectedElement.p1[0] = worldPos[0];
+              this.selectedElement.p1[1] = worldPos[1];
+            } else if (this.selectedNodeIdx === 1) {
+              this.selectedElement.p2[0] = worldPos[0];
+              this.selectedElement.p2[1] = worldPos[1];
+            }
+            this.notifySceneChanged();
           }
         }
         return;
@@ -353,6 +456,7 @@ class OpticsCanvasController {
         canvas.style.cursor = 'crosshair';
       }
       this.isDraggingElement = false;
+      this.selectedNodeIdx = -1;
 
       if (this.mode === CanvasMode.DRAW_FREEHAND && this.isDrawing) {
         this.isDrawing = false;
@@ -774,22 +878,76 @@ class OpticsCanvasController {
     ctx.save();
 
     // 1. Visualización de Nodos en Modo NODE_EDIT
-    if (this.mode === CanvasMode.NODE_EDIT && this.selectedElement instanceof CustomLens) {
-      const pts = this.selectedElement.controlPoints;
-      for (let i = 0; i < pts.length; i++) {
-        const sp = this.worldToScreen(pts[i][0], pts[i][1]);
-        const isSelectedNode = (i === this.selectedNodeIdx);
+    if (this.mode === CanvasMode.NODE_EDIT) {
+      // 1A. Puntos de guía para elementos NO seleccionados (para indicar que son editables con un clic)
+      for (let j = 0; j < this.elements.length; j++) {
+        const elem = this.elements[j];
+        if (elem === this.selectedElement) continue;
 
-        ctx.fillStyle = isSelectedNode ? '#ff5577' : '#ffe600';
-        ctx.strokeStyle = '#0f111a';
-        ctx.lineWidth = 2;
-        ctx.shadowColor = isSelectedNode ? 'rgba(255, 85, 119, 0.8)' : 'rgba(255, 230, 0, 0.6)';
-        ctx.shadowBlur = 8;
+        if (elem instanceof CustomLens) {
+          const pts = elem.controlPoints;
+          ctx.fillStyle = 'rgba(0, 255, 204, 0.45)';
+          ctx.strokeStyle = 'rgba(15, 17, 26, 0.75)';
+          ctx.lineWidth = 1.5;
+          ctx.shadowBlur = 0;
+          for (let i = 0; i < pts.length; i++) {
+            const sp = this.worldToScreen(pts[i][0], pts[i][1]);
+            ctx.beginPath();
+            ctx.arc(sp.x, sp.y, 4.0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          }
+        } else if (elem instanceof FlatMirror || elem instanceof DetectorScreen) {
+          const pts = [elem.p1, elem.p2];
+          ctx.fillStyle = 'rgba(56, 189, 248, 0.45)';
+          ctx.strokeStyle = 'rgba(15, 17, 26, 0.75)';
+          ctx.lineWidth = 1.5;
+          ctx.shadowBlur = 0;
+          for (let i = 0; i < pts.length; i++) {
+            const sp = this.worldToScreen(pts[i][0], pts[i][1]);
+            ctx.beginPath();
+            ctx.arc(sp.x, sp.y, 4.0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          }
+        }
+      }
 
-        ctx.beginPath();
-        ctx.arc(sp.x, sp.y, isSelectedNode ? 7.5 : 5.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
+      // 1B. Nodos interactivos destacados para la figura SELECCIONADA
+      if (this.selectedElement instanceof CustomLens) {
+        const pts = this.selectedElement.controlPoints;
+        for (let i = 0; i < pts.length; i++) {
+          const sp = this.worldToScreen(pts[i][0], pts[i][1]);
+          const isSelectedNode = (i === this.selectedNodeIdx);
+
+          ctx.fillStyle = isSelectedNode ? '#ff5577' : '#ffe600';
+          ctx.strokeStyle = '#0f111a';
+          ctx.lineWidth = 2.5;
+          ctx.shadowColor = isSelectedNode ? 'rgba(255, 85, 119, 0.95)' : 'rgba(255, 230, 0, 0.8)';
+          ctx.shadowBlur = 10;
+
+          ctx.beginPath();
+          ctx.arc(sp.x, sp.y, isSelectedNode ? 8.0 : 6.0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+      } else if (this.selectedElement instanceof FlatMirror || this.selectedElement instanceof DetectorScreen) {
+        const pts = [this.selectedElement.p1, this.selectedElement.p2];
+        for (let i = 0; i < pts.length; i++) {
+          const sp = this.worldToScreen(pts[i][0], pts[i][1]);
+          const isSelectedNode = (i === this.selectedNodeIdx);
+
+          ctx.fillStyle = isSelectedNode ? '#ff5577' : '#ffe600';
+          ctx.strokeStyle = '#0f111a';
+          ctx.lineWidth = 2.5;
+          ctx.shadowColor = isSelectedNode ? 'rgba(255, 85, 119, 0.95)' : 'rgba(255, 230, 0, 0.8)';
+          ctx.shadowBlur = 10;
+
+          ctx.beginPath();
+          ctx.arc(sp.x, sp.y, isSelectedNode ? 8.0 : 6.0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
       }
     }
 
