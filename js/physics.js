@@ -14,6 +14,17 @@ const RAINBOW_7_WAVELENGTHS = [
   405.0  // Violeta (Violet)
 ];
 
+// Colores RGB canónicos de alto contraste y saturación para los 7 colores espectrales
+const RAINBOW_7_COLORS = [
+  [255, 30, 30],   // Rojo (680 nm)
+  [255, 135, 0],   // Naranja (610 nm)
+  [255, 235, 0],   // Amarillo (580 nm)
+  [0, 240, 50],    // Verde (535 nm)
+  [0, 220, 255],   // Cian (495 nm)
+  [30, 90, 255],   // Azul (450 nm)
+  [180, 20, 255]   // Violeta (405 nm)
+];
+
 class Ray {
   constructor(origin, direction, wavelength = 532.0, intensity = 1.0, depth = 0, color = null, isWhiteLight = false) {
     this.origin = [origin[0], origin[1]];
@@ -171,8 +182,8 @@ function reflectRay(inDir, normal) {
 function cauchyRefractiveIndex(baseN, wavelengthNm, dispersionBoost = false) {
   const lambdaUm = wavelengthNm / 1000.0;
   const lambdaRefUm = 0.589;
-  // Factor de dispersión Cauchy calibrado para separación visual nítida en pantalla
-  const coeff = dispersionBoost ? 0.0085 : 0.0045;
+  // Factor de dispersión Cauchy calibrado para separación visual clara y didáctica (arcoíris nítido en prismas y lentes)
+  const coeff = dispersionBoost ? 0.038 : 0.006;
   const B = coeff * (baseN - 1.0);
   const A = baseN - B / (lambdaRefUm * lambdaRefUm);
   return A + B / (lambdaUm * lambdaUm);
@@ -347,6 +358,7 @@ function traceRayScene(ray, elements, maxBounces = 40, minIntensity = 0.01) {
 // Exportar globalmente
 window.Ray = Ray;
 window.RAINBOW_7_WAVELENGTHS = RAINBOW_7_WAVELENGTHS;
+window.RAINBOW_7_COLORS = RAINBOW_7_COLORS;
 window.wavelengthToRGB = wavelengthToRGB;
 window.raySegmentIntersection = raySegmentIntersection;
 window.refractRay = refractRay;

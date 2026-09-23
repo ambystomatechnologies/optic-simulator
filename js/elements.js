@@ -370,14 +370,33 @@ class LightSource {
     const dir = this.getDirectionVector();
     const perp = [-dir[1], dir[0]];
 
-    // 7 Longitudes de onda del arcoíris si es luz blanca, o longitud de onda única si es monocromática
-    const rainbowColors = window.RAINBOW_7_WAVELENGTHS || [680.0, 610.0, 580.0, 535.0, 495.0, 450.0, 405.0];
-    const wavelengthsToEmit = this.isWhiteLight ? rainbowColors : [this.wavelength];
+    // Si es Haz de Luz Blanca: UN SOLO haz central grueso compuesto por los 7 colores del arcoíris
+    if (this.isWhiteLight) {
+      const rainbowWls = window.RAINBOW_7_WAVELENGTHS || [680.0, 610.0, 580.0, 535.0, 495.0, 450.0, 405.0];
+      const rainbowCols = window.RAINBOW_7_COLORS || [
+        [255, 30, 30],
+        [255, 135, 0],
+        [255, 235, 0],
+        [0, 240, 50],
+        [0, 220, 255],
+        [30, 90, 255],
+        [180, 20, 255]
+      ];
+
+      for (let i = 0; i < rainbowWls.length; i++) {
+        const wl = rainbowWls[i];
+        const col = rainbowCols[i] || wavelengthToRGB(wl);
+        rays.push(new Ray(this.position, dir, wl, 1.0, 0, col, true));
+      }
+      return rays;
+    }
+
+    const wavelengthsToEmit = [this.wavelength];
 
     if (this.sourceType === "laser" || this.sourceType === "parallel") {
       if (this.rayCount === 1) {
         for (const wl of wavelengthsToEmit) {
-          rays.push(new Ray(this.position, dir, wl, 1.0, 0, null, this.isWhiteLight));
+          rays.push(new Ray(this.position, dir, wl, 1.0, 0, null, false));
         }
       } else {
         const halfW = this.beamWidth / 2.0;
@@ -390,7 +409,7 @@ class LightSource {
             this.position[1] + perp[1] * off
           ];
           for (const wl of wavelengthsToEmit) {
-            rays.push(new Ray(orig, dir, wl, 1.0, 0, null, this.isWhiteLight));
+            rays.push(new Ray(orig, dir, wl, 1.0, 0, null, false));
           }
         }
       }

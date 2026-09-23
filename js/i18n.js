@@ -29,9 +29,11 @@ const OPTICS_I18N = {
     btnRuler: "📏 Optical Ruler",
     btnRulerTitle: "Click and drag to measure distances and angles across the scene",
 
-    // Dedicated Add Light Source Button
+    // Dedicated Buttons
     btnAddLightSource: "💡 Add Light Source",
     btnAddLightSourceTitle: "Spawn a new customizable light source in the scene",
+    btnAddDetectorScreen: "📺 Detector Screen",
+    btnAddDetectorScreenTitle: "Add an optical detector screen to measure ray hits",
 
     // Quick Add Dropdowns
     optAddOptics: "-- Add Optics --",
@@ -136,6 +138,7 @@ const OPTICS_I18N = {
     toast_cleared: "Scene cleared.",
     toast_element_added: '"{name}" added to scene.',
     toast_source_added: "New light source added to scene.",
+    toast_screen_added: "Detector screen added to scene.",
     toast_drawing_finished: "Custom lens successfully created!",
     toast_drawing_min_points: "Please draw at least 3 points to form a closed lens.",
     toast_element_deleted: "Selected element removed.",
@@ -173,9 +176,11 @@ const OPTICS_I18N = {
     btnRuler: "📏 Regla / Medidor",
     btnRulerTitle: "Haz clic y arrastra para medir distancias y ángulos en el lienzo",
 
-    // Dedicated Add Light Source Button
+    // Dedicated Buttons
     btnAddLightSource: "💡 Agregar nueva fuente de luz",
     btnAddLightSourceTitle: "Agrega una nueva fuente de luz configurable a la escena",
+    btnAddDetectorScreen: "📺 Pantalla Detectora",
+    btnAddDetectorScreenTitle: "Agrega una pantalla detectora óptica para registrar impactos de rayos",
 
     // Quick Add Dropdowns
     optAddOptics: "-- Agregar Óptica --",
@@ -280,6 +285,7 @@ const OPTICS_I18N = {
     toast_cleared: "Escena limpiada.",
     toast_element_added: '"{name}" añadido a la escena.',
     toast_source_added: "Nueva fuente de luz añadida a la escena.",
+    toast_screen_added: "Pantalla detectora añadida a la escena.",
     toast_drawing_finished: "¡Lente personalizada creada con éxito!",
     toast_drawing_min_points: "Por favor dibuja al menos 3 puntos para cerrar la lente.",
     toast_element_deleted: "Elemento seleccionado eliminado.",

@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnFinishDraw = document.getElementById('btn-tool-finish-draw');
   const btnRuler = document.getElementById('btn-tool-ruler');
   const btnAddLightSource = document.getElementById('btn-add-light-source');
+  const btnAddDetectorScreen = document.getElementById('btn-add-detector-screen');
 
   const cbAddOptics = document.getElementById('cb-add-optics');
   const cbAddSource = document.getElementById('cb-add-source');
@@ -163,6 +164,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
       sim.addSource(newSource);
       showToast(window.t('toast_source_added'), 'success');
+    });
+  }
+
+  // --- BOTÓN DEDICADO: AGREGAR PANTALLA DETECTORA ---
+  if (btnAddDetectorScreen) {
+    btnAddDetectorScreen.addEventListener('click', () => {
+      const nScreen = sim.elements.filter(e => e instanceof DetectorScreen).length;
+      const posX = 160.0 + (nScreen * 25);
+      const posY = -100.0;
+      const screenName = window.currentLang === 'es' 
+        ? `Pantalla Detectora ${nScreen + 1}` 
+        : `Detector Screen ${nScreen + 1}`;
+      const screen = new DetectorScreen([posX, posY], [posX, posY + 200.0], screenName);
+      sim.addElement(screen);
+      showToast(window.t('toast_screen_added'), 'success');
     });
   }
 
@@ -561,10 +577,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const prism = createTriangularPrism(0.0, 0.0, 130, 1.65, true);
     sim.addElement(prism);
 
-    const laser = new LightSource([-230.0, 0.0], 0.0, "Láser Blanco Multiespectral");
+    const laser = new LightSource([-230.0, 0.0], 0.0, "Láser Óptico (532 nm)");
     laser.sourceType = "laser";
     laser.rayCount = 1;
-    laser.isWhiteLight = true;
+    laser.wavelength = 532.0;
+    laser.isWhiteLight = false;
     sim.addSource(laser);
 
     showToast(window.t('statusLoadedDemo', { name: window.t('optDemo1') }), 'info');

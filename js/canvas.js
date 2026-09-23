@@ -489,29 +489,94 @@ class OpticsCanvasController {
       if (!src.isActive) continue;
 
       const rays = src.generateRays();
-      for (let r = 0; r < rays.length; r++) {
-        const ray = rays[r];
-        const path = traceRayScene(ray, this.elements, this.maxBounces, this.minIntensity);
-        if (path.length < 2) continue;
 
-        const rgb = ray.color;
-        const colorStr = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-        const glowColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.4)`;
-
-        ctx.strokeStyle = colorStr;
-        ctx.shadowColor = glowColor;
-        ctx.shadowBlur = 6;
-        ctx.lineWidth = 1.6;
-
-        ctx.beginPath();
-        const startScreen = this.worldToScreen(path[0][0], path[0][1]);
-        ctx.moveTo(startScreen.x, startScreen.y);
-
-        for (let p = 1; p < path.length; p++) {
-          const ptScreen = this.worldToScreen(path[p][0], path[p][1]);
-          ctx.lineTo(ptScreen.x, ptScreen.y);
+      if (src.isWhiteLight) {
+        // Trazar los 7 rayos espectrales de Newton
+        const rayPaths = [];
+        for (let r = 0; r < rays.length; r++) {
+          const ray = rays[r];
+          const path = traceRayScene(ray, this.elements, this.maxBounces, this.minIntensity);
+          rayPaths.push({ ray, path });
         }
-        ctx.stroke();
+
+        // 1. Dibujar el Haz Incidente Blanco Grueso (tramo 0: desde el emisor hasta el primer impacto o infinito)
+        if (rayPaths.length > 0 && rayPaths[0].path.length >= 2) {
+          const p0 = rayPaths[0].path[0];
+          const p1 = rayPaths[0].path[1];
+          const s0 = this.worldToScreen(p0[0], p0[1]);
+          const s1 = this.worldToScreen(p1[0], p1[1]);
+
+          ctx.save();
+          // Halo de dispersión blanco grueso
+          ctx.strokeStyle = '#ffffff';
+          ctx.shadowColor = 'rgba(255, 255, 255, 0.95)';
+          ctx.shadowBlur = 10;
+          ctx.lineWidth = 4.2;
+          ctx.beginPath();
+          ctx.moveTo(s0.x, s0.y);
+          ctx.lineTo(s1.x, s1.y);
+          ctx.stroke();
+
+          // Núcleo brillante
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2.2;
+          ctx.beginPath();
+          ctx.moveTo(s0.x, s0.y);
+          ctx.lineTo(s1.x, s1.y);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // 2. Dibujar las Refracciones Espectrales en los 7 Colores del Arcoíris (a partir del primer impacto en el cristal)
+        for (let r = 0; r < rayPaths.length; r++) {
+          const { ray, path } = rayPaths[r];
+          if (path.length <= 1) continue;
+
+          const rgb = ray.color;
+          const colorStr = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+          const glowColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.55)`;
+
+          ctx.strokeStyle = colorStr;
+          ctx.shadowColor = glowColor;
+          ctx.shadowBlur = 6;
+          ctx.lineWidth = 2.2;
+
+          ctx.beginPath();
+          const startPt = this.worldToScreen(path[1][0], path[1][1]);
+          ctx.moveTo(startPt.x, startPt.y);
+
+          for (let p = 2; p < path.length; p++) {
+            const ptScreen = this.worldToScreen(path[p][0], path[p][1]);
+            ctx.lineTo(ptScreen.x, ptScreen.y);
+          }
+          ctx.stroke();
+        }
+      } else {
+        // Fuente normal monocromática
+        for (let r = 0; r < rays.length; r++) {
+          const ray = rays[r];
+          const path = traceRayScene(ray, this.elements, this.maxBounces, this.minIntensity);
+          if (path.length < 2) continue;
+
+          const rgb = ray.color;
+          const colorStr = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+          const glowColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.4)`;
+
+          ctx.strokeStyle = colorStr;
+          ctx.shadowColor = glowColor;
+          ctx.shadowBlur = 6;
+          ctx.lineWidth = 1.6;
+
+          ctx.beginPath();
+          const startScreen = this.worldToScreen(path[0][0], path[0][1]);
+          ctx.moveTo(startScreen.x, startScreen.y);
+
+          for (let p = 1; p < path.length; p++) {
+            const ptScreen = this.worldToScreen(path[p][0], path[p][1]);
+            ctx.lineTo(ptScreen.x, ptScreen.y);
+          }
+          ctx.stroke();
+        }
       }
     }
     ctx.restore();
