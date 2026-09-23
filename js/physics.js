@@ -182,8 +182,8 @@ function reflectRay(inDir, normal) {
 function cauchyRefractiveIndex(baseN, wavelengthNm, dispersionBoost = false) {
   const lambdaUm = wavelengthNm / 1000.0;
   const lambdaRefUm = 0.589;
-  // Factor de dispersión Cauchy calibrado para separación visual clara y didáctica (arcoíris nítido en prismas y lentes)
-  const coeff = dispersionBoost ? 0.038 : 0.006;
+  // Factor de dispersión Cauchy calibrado para separación visual nítida y visible de los 7 colores
+  const coeff = dispersionBoost ? 0.048 : 0.007;
   const B = coeff * (baseN - 1.0);
   const A = baseN - B / (lambdaRefUm * lambdaRefUm);
   return A + B / (lambdaUm * lambdaUm);

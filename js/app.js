@@ -588,10 +588,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function loadDemoPrismDispersion() {
     sim.clearScene();
 
-    const prism = createTriangularPrism(0.0, 0.0, 130, 1.65, true);
+    const prism = createTriangularPrism(0.0, 0.0, 130, 1.50, true);
     sim.addElement(prism);
 
-    const laser = new LightSource([-230.0, 0.0], 0.0, "Láser Óptico (532 nm)");
+    const laser = new LightSource([-230.0, -12.0], 0.0, "Láser Óptico (532 nm)");
     laser.sourceType = "laser";
     laser.rayCount = 1;
     laser.wavelength = 532.0;

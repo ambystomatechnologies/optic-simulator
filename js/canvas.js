@@ -500,23 +500,23 @@ class OpticsCanvasController {
         }
 
         // 1. Dibujar el Haz Incidente Blanco Grueso (tramo 0: desde el emisor hasta el primer impacto o infinito)
+        const count = src.rayCount || 11;
+        const beamThickness = Math.max(3.0, 2.0 + count * 0.95);
+        const glowBlur = Math.min(32, 8 + beamThickness * 0.6);
+
         if (rayPaths.length > 0 && rayPaths[0].path.length >= 2) {
-          const p0 = rayPaths[0].path[0];
-          const p1 = rayPaths[0].path[1];
+          const midIdx = Math.floor(rayPaths.length / 2);
+          const p0 = rayPaths[midIdx].path[0];
+          const p1 = rayPaths[midIdx].path[1];
           const s0 = this.worldToScreen(p0[0], p0[1]);
           const s1 = this.worldToScreen(p1[0], p1[1]);
 
-          // El slider de cantidad de rayos (1 a 80) controla directamente el grosor del haz de luz blanca
-          const count = src.rayCount || 11;
-          const beamThickness = Math.max(2.5, 1.8 + count * 0.62);
-          const glowBlur = Math.min(30, 6 + beamThickness * 0.55);
-
           ctx.save();
           // Halo de resplandor blanco exterior
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
           ctx.shadowColor = 'rgba(255, 255, 255, 0.95)';
           ctx.shadowBlur = glowBlur;
-          ctx.lineWidth = beamThickness + 4;
+          ctx.lineWidth = beamThickness + 5;
           ctx.beginPath();
           ctx.moveTo(s0.x, s0.y);
           ctx.lineTo(s1.x, s1.y);
@@ -534,7 +534,7 @@ class OpticsCanvasController {
           // Núcleo central hiperbrillante
           ctx.strokeStyle = '#ffffff';
           ctx.shadowBlur = 0;
-          ctx.lineWidth = Math.max(1.8, beamThickness * 0.35);
+          ctx.lineWidth = Math.max(2.0, beamThickness * 0.35);
           ctx.beginPath();
           ctx.moveTo(s0.x, s0.y);
           ctx.lineTo(s1.x, s1.y);
@@ -543,19 +543,24 @@ class OpticsCanvasController {
         }
 
         // 2. Dibujar las Refracciones Espectrales en los 7 Colores del Arcoíris (a partir del primer impacto en el cristal)
-        const count = src.rayCount || 11;
-        const refrThickness = Math.max(2.0, 1.4 + count * 0.12);
+        // Usar 'source-over' para que los 7 colores primarios se muestren vibrantes y puros sin quemarse aditivamente a blanco
+        ctx.save();
+        ctx.globalCompositeOperation = 'source-over';
+
+        // El grosor de los rayos refractados acompaña armónicamente el grosor de la fuente
+        const refrThickness = Math.max(2.8, beamThickness * 0.42);
+
         for (let r = 0; r < rayPaths.length; r++) {
           const { ray, path } = rayPaths[r];
           if (path.length <= 1) continue;
 
           const rgb = ray.color;
           const colorStr = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-          const glowColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.65)`;
+          const glowColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.8)`;
 
           ctx.strokeStyle = colorStr;
           ctx.shadowColor = glowColor;
-          ctx.shadowBlur = Math.min(16, 5 + refrThickness * 0.8);
+          ctx.shadowBlur = Math.min(18, 4 + refrThickness * 0.5);
           ctx.lineWidth = refrThickness;
 
           ctx.beginPath();
@@ -568,6 +573,7 @@ class OpticsCanvasController {
           }
           ctx.stroke();
         }
+        ctx.restore();
       } else {
         // Fuente normal monocromática
         for (let r = 0; r < rays.length; r++) {

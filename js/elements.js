@@ -370,23 +370,31 @@ class LightSource {
     const dir = this.getDirectionVector();
     const perp = [-dir[1], dir[0]];
 
-    // Si es Haz de Luz Blanca: UN SOLO haz central grueso compuesto por los 7 colores del arcoíris
+    // Si es Haz de Luz Blanca: 7 colores espectrales distribuidos a lo largo del frente del haz grueso
     if (this.isWhiteLight) {
       const rainbowWls = window.RAINBOW_7_WAVELENGTHS || [680.0, 610.0, 580.0, 535.0, 495.0, 450.0, 405.0];
       const rainbowCols = window.RAINBOW_7_COLORS || [
-        [255, 30, 30],
-        [255, 135, 0],
-        [255, 235, 0],
-        [0, 240, 50],
+        [255, 35, 35],
+        [255, 125, 0],
+        [255, 230, 0],
+        [0, 230, 60],
         [0, 220, 255],
-        [30, 90, 255],
+        [30, 100, 255],
         [180, 20, 255]
       ];
+
+      const count = Math.max(1, this.rayCount || 11);
+      const halfW = count > 1 ? Math.min(24.0, 0.8 + count * 0.42) : 0;
 
       for (let i = 0; i < rainbowWls.length; i++) {
         const wl = rainbowWls[i];
         const col = rainbowCols[i] || wavelengthToRGB(wl);
-        rays.push(new Ray(this.position, dir, wl, 1.0, 0, col, true));
+        const offset = halfW > 0 ? -halfW + (2.0 * halfW * i) / (rainbowWls.length - 1) : 0;
+        const origin = [
+          this.position[0] + perp[0] * offset,
+          this.position[1] + perp[1] * offset
+        ];
+        rays.push(new Ray(origin, dir, wl, 1.0, 0, col, true));
       }
       return rays;
     }
@@ -517,7 +525,7 @@ function createBiconcaveLens(centerX, centerY, width = 45, height = 140, n = 1.5
   return new CustomLens(pts, n, "Lente Bicóncava", false);
 }
 
-function createTriangularPrism(centerX, centerY, sideLength = 120, n = 1.65, dispersion = true) {
+function createTriangularPrism(centerX, centerY, sideLength = 120, n = 1.50, dispersion = true) {
   const h = sideLength * Math.sqrt(3) / 2.0;
   const pts = [
     [centerX, centerY - 2.0 * h / 3.0],
