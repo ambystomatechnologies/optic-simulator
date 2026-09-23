@@ -26,15 +26,31 @@
 <body>
 
   <div class="app-container">
-    <!-- Encabezado Superior -->
+    <!-- Encabezado Superior con Publicidad en el centro -->
     <header class="header-navbar">
-      <a href="https://ambystomatechnologies.github.io/" class="nav-brand" title="Ambystoma Technologies - Portal Principal" onclick="window.location.href='https://ambystomatechnologies.github.io/';">
+      <a href="https://ambystomatechnologies.github.io/" target="_blank" rel="noopener noreferrer" class="nav-brand" title="Ambystoma Technologies - Portal Principal">
         <img src="logo.png" alt="Ambystoma Technologies" class="navbar-logo-img">
         <div class="brand-text">
           <h1 data-i18n="brandTitle">2D Optics Simulator <span>Ambystoma Studio</span></h1>
           <p data-i18n="brandDesc">Interactive Ray Tracing, Lenses, Prisms & Reflection</p>
         </div>
       </a>
+
+      <!-- Espacio Publicitario Central en el Header (entre título y banderas) -->
+      <div class="header-ad-zone" id="header-ad-zone">
+        <span class="ad-tag-header" data-i18n="adLabel">ADVERTISEMENT</span>
+        <div class="ad-slot-box-header" id="ad-header-slot">
+          <ins class="adsbygoogle"
+               style="display:inline-block;min-width:280px;max-width:468px;width:100%;height:44px;"
+               data-ad-client="ca-pub-5786595894984320"
+               data-ad-slot="auto"
+               data-ad-format="horizontal"
+               data-full-width-responsive="false"></ins>
+          <script>
+               (adsbygoogle = window.adsbygoogle || []).push({});
+          </script>
+        </div>
+      </div>
 
       <div class="nav-right-actions">
         <!-- Selector de Idiomas con Banderas Circulares -->
@@ -95,82 +111,7 @@
         </div>
       </div>
     </header>
-
-    <!-- Barra de Herramientas Principal -->
-    <div class="toolbar-top">
-      <div class="toolbar-group">
-        <button type="button" class="btn-tool active" id="btn-tool-select" data-i18n="btnSelect" data-i18n-title="btnSelectTitle">🔍 Move / Select</button>
-        <button type="button" class="btn-tool" id="btn-tool-node-edit" data-i18n="btnNodeEdit" data-i18n-title="btnNodeEditTitle">✏️ Deform Nodes</button>
-        <button type="button" class="btn-tool" id="btn-tool-draw-freehand" data-i18n="btnDrawFreehand" data-i18n-title="btnDrawFreehandTitle">✍️ Draw Freehand</button>
-        <button type="button" class="btn-tool" id="btn-tool-draw-poly" data-i18n="btnDrawPoly" data-i18n-title="btnDrawPolyTitle">📐 Custom Polygon</button>
-        <button type="button" class="btn-tool btn-finish-draw" id="btn-tool-finish-draw" data-i18n="btnFinishDraw" data-i18n-title="btnFinishDrawTitle">✅ OK - Finish</button>
-        <button type="button" class="btn-tool" id="btn-tool-ruler" data-i18n="btnRuler" data-i18n-title="btnRulerTitle">📏 Optical Ruler</button>
-      </div>
-
-      <div class="toolbar-separator"></div>
-
-      <!-- BOTÓN DEDICADO: AGREGAR NUEVA FUENTE DE LUZ -->
-      <button type="button" class="btn-tool btn-add-source-special" id="btn-add-light-source" data-i18n="btnAddLightSource" data-i18n-title="btnAddLightSourceTitle">
-        💡 Add Light Source
-      </button>
-
-      <div class="toolbar-separator"></div>
-
-      <!-- Desplegable Agregar Óptica -->
-      <select id="cb-add-optics" class="select-optics">
-        <option value="" selected data-i18n="optAddOptics">-- Add Optics --</option>
-        <option value="biconvex" data-i18n="optBiconvex">Biconvex Lens</option>
-        <option value="biconcave" data-i18n="optBiconcave">Biconcave Lens</option>
-        <option value="prism" data-i18n="optPrism">Triangular Prism</option>
-        <option value="slab" data-i18n="optSlab">Glass Block / Slab</option>
-        <option value="mirror" data-i18n="optMirror">Flat Mirror</option>
-        <option value="screen" data-i18n="optScreen">Detector Screen</option>
-      </select>
-
-      <!-- Desplegable Agregar Fuentes de Luz -->
-      <select id="cb-add-source" class="select-optics">
-        <option value="" selected data-i18n="optAddSource">-- Add Light Source --</option>
-        <option value="laser" data-i18n="optSourceLaser">Laser Beam</option>
-        <option value="fan" data-i18n="optSourceFan">Point Source (Fan)</option>
-        <option value="parallel" data-i18n="optSourceParallel">Parallel Beam</option>
-        <option value="object" data-i18n="optSourceObject">Pencil Object (Ray Object)</option>
-      </select>
-
-      <div class="toolbar-separator"></div>
-
-      <!-- Desplegable Demos de Física -->
-      <select id="cb-demos" class="select-optics">
-        <option value="" selected data-i18n="optDemos">Physics Demos...</option>
-        <option value="1" data-i18n="optDemo1">1. Rainbow Prism (Dispersion)</option>
-        <option value="2" data-i18n="optDemo2">2. Spherical Aberration in Lens</option>
-        <option value="3" data-i18n="optDemo3">3. Real Image Formation (Pencil)</option>
-        <option value="4" data-i18n="optDemo4">4. Custom Hand-Drawn Wavy Lens</option>
-        <option value="5" data-i18n="optDemo5">5. Total Internal Reflection (TIR)</option>
-      </select>
-
-      <div class="toolbar-separator"></div>
-
-      <!-- Botón Limpiar Escena -->
-      <button type="button" class="btn-tool btn-clear-scene" id="btn-clear-scene" data-i18n="btnClear" data-i18n-title="btnClearTitle">🗑️ Clear Scene</button>
-    </div>
-
-    <!-- Espacio Reservado para Publicidad Superior Oficial -->
-    <aside class="ad-banner-top">
-      <span class="ad-tag" data-i18n="adLabel">ADVERTISEMENT</span>
-      <div class="ad-slot-box" id="ad-top-slot">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-5786595894984320"
-             data-ad-slot="auto"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-      </div>
-    </aside>
-
-    <!-- Workspace Principal (3 Columnas) -->
+    <!-- Workspace Principal (3 Columnas) - Elevado directamente debajo del header -->
     <div class="workspace-layout">
       <!-- Columna Izquierda: Elementos de la Escena y Detector -->
       <aside class="panel-left">
@@ -313,6 +254,64 @@
           </script>
         </aside>
       </aside>
+    </div>
+
+    <!-- Barra de Herramientas Principal (Ubicada debajo del espacio de trabajo) -->
+    <div class="toolbar-bottom" id="main-toolbar">
+      <div class="toolbar-group">
+        <button type="button" class="btn-tool active" id="btn-tool-select" data-i18n="btnSelect" data-i18n-title="btnSelectTitle">🔍 Move / Select</button>
+        <button type="button" class="btn-tool" id="btn-tool-node-edit" data-i18n="btnNodeEdit" data-i18n-title="btnNodeEditTitle">✏️ Deform Nodes</button>
+        <button type="button" class="btn-tool" id="btn-tool-draw-freehand" data-i18n="btnDrawFreehand" data-i18n-title="btnDrawFreehandTitle">✍️ Draw Freehand</button>
+        <button type="button" class="btn-tool" id="btn-tool-draw-poly" data-i18n="btnDrawPoly" data-i18n-title="btnDrawPolyTitle">📐 Custom Polygon</button>
+        <button type="button" class="btn-tool btn-finish-draw" id="btn-tool-finish-draw" data-i18n="btnFinishDraw" data-i18n-title="btnFinishDrawTitle">✅ OK - Finish</button>
+        <button type="button" class="btn-tool" id="btn-tool-ruler" data-i18n="btnRuler" data-i18n-title="btnRulerTitle">📏 Optical Ruler</button>
+      </div>
+
+      <div class="toolbar-separator"></div>
+
+      <!-- BOTÓN DEDICADO: AGREGAR NUEVA FUENTE DE LUZ -->
+      <button type="button" class="btn-tool btn-add-source-special" id="btn-add-light-source" data-i18n="btnAddLightSource" data-i18n-title="btnAddLightSourceTitle">
+        💡 Add Light Source
+      </button>
+
+      <div class="toolbar-separator"></div>
+
+      <!-- Desplegable Agregar Óptica -->
+      <select id="cb-add-optics" class="select-optics">
+        <option value="" selected data-i18n="optAddOptics">-- Add Optics --</option>
+        <option value="biconvex" data-i18n="optBiconvex">Biconvex Lens</option>
+        <option value="biconcave" data-i18n="optBiconcave">Biconcave Lens</option>
+        <option value="prism" data-i18n="optPrism">Triangular Prism</option>
+        <option value="slab" data-i18n="optSlab">Glass Block / Slab</option>
+        <option value="mirror" data-i18n="optMirror">Flat Mirror</option>
+        <option value="screen" data-i18n="optScreen">Detector Screen</option>
+      </select>
+
+      <!-- Desplegable Agregar Fuentes de Luz -->
+      <select id="cb-add-source" class="select-optics">
+        <option value="" selected data-i18n="optAddSource">-- Add Light Source --</option>
+        <option value="laser" data-i18n="optSourceLaser">Laser Beam</option>
+        <option value="fan" data-i18n="optSourceFan">Point Source (Fan)</option>
+        <option value="parallel" data-i18n="optSourceParallel">Parallel Beam</option>
+        <option value="object" data-i18n="optSourceObject">Pencil Object (Ray Object)</option>
+      </select>
+
+      <div class="toolbar-separator"></div>
+
+      <!-- Desplegable Demos de Física -->
+      <select id="cb-demos" class="select-optics">
+        <option value="" selected data-i18n="optDemos">Physics Demos...</option>
+        <option value="1" data-i18n="optDemo1">1. Rainbow Prism (Dispersion)</option>
+        <option value="2" data-i18n="optDemo2">2. Spherical Aberration in Lens</option>
+        <option value="3" data-i18n="optDemo3">3. Real Image Formation (Pencil)</option>
+        <option value="4" data-i18n="optDemo4">4. Custom Hand-Drawn Wavy Lens</option>
+        <option value="5" data-i18n="optDemo5">5. Total Internal Reflection (TIR)</option>
+      </select>
+
+      <div class="toolbar-separator"></div>
+
+      <!-- Botón Limpiar Escena -->
+      <button type="button" class="btn-tool btn-clear-scene" id="btn-clear-scene" data-i18n="btnClear" data-i18n-title="btnClearTitle">🗑️ Clear Scene</button>
     </div>
 
     <!-- Barra de Estado Inferior -->

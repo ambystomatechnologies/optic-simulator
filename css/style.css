@@ -48,7 +48,8 @@ html, body {
 
 /* --- HEADER NAVBAR --- */
 .header-navbar {
-  height: 56px;
+  min-height: 58px;
+  height: 60px;
   background-color: var(--bg-panel);
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -57,6 +58,7 @@ html, body {
   padding: 0 1.25rem;
   z-index: 100;
   flex-shrink: 0;
+  gap: 1.25rem;
 }
 
 .nav-brand {
@@ -65,6 +67,7 @@ html, body {
   gap: 1rem;
   text-decoration: none;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .navbar-logo-img {
@@ -98,10 +101,46 @@ html, body {
   color: var(--text-dim);
 }
 
+/* --- ESPACIO PUBLICITARIO CENTRAL EN EL HEADER --- */
+.header-ad-zone {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  max-height: 52px;
+  padding: 0 0.5rem;
+  overflow: hidden;
+}
+
+.ad-tag-header {
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+.ad-slot-box-header {
+  height: 46px;
+  min-height: 38px;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
 .nav-right-actions {
   display: flex;
   align-items: center;
   gap: 0.85rem;
+  flex-shrink: 0;
 }
 
 /* Selector de Idiomas con Banderas Circulares */
@@ -184,9 +223,11 @@ html, body {
   font-weight: 600;
 }
 
-/* --- TOOLBAR SUPERIOR DE HERRAMIENTAS --- */
+/* --- TOOLBAR DE HERRAMIENTAS (Debajo del espacio de trabajo) --- */
+.toolbar-bottom,
 .toolbar-top {
   background-color: var(--bg-panel);
+  border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -788,6 +829,12 @@ html, body {
 }
 
 /* Responsive */
+@media (max-width: 1100px) {
+  .header-ad-zone {
+    display: none;
+  }
+}
+
 @media (max-width: 900px) {
   .panel-left {
     display: none;
