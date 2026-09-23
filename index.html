@@ -100,6 +100,14 @@
           </button>
         </div>
 
+        <!-- Botones móviles para acceder a paneles de Escena y Propiedades -->
+        <button type="button" class="btn-nav-mobile-toggle" id="btn-toggle-scene" data-i18n-title="panelSceneTitle" aria-label="Scene">
+          <span data-i18n="btnMobileScene">📋 Scene</span>
+        </button>
+        <button type="button" class="btn-nav-mobile-toggle" id="btn-toggle-props" data-i18n-title="panelPropertiesTitle" aria-label="Properties">
+          <span data-i18n="btnMobileProps">⚙️ Settings</span>
+        </button>
+
         <button type="button" class="btn-nav-about" id="btn-open-about" data-i18n-title="btnAboutTitle">
           <span>ℹ️</span>
           <span data-i18n="btnAbout">About</span>
@@ -113,8 +121,17 @@
     </header>
     <!-- Workspace Principal (3 Columnas) - Elevado directamente debajo del header -->
     <div class="workspace-layout">
+      <!-- Backdrop para Drawer en Móviles -->
+      <div class="drawer-backdrop" id="drawer-backdrop"></div>
+
       <!-- Columna Izquierda: Elementos de la Escena y Detector -->
-      <aside class="panel-left">
+      <aside class="panel-left" id="panel-left">
+        <!-- Cabecera de cierre en móvil -->
+        <div class="mobile-drawer-header">
+          <span class="mobile-drawer-title" data-i18n="panelSceneTitle">Scene Elements</span>
+          <button type="button" class="btn-close-drawer" id="btn-close-scene-drawer" data-i18n="btnCloseDrawer">✕ Close</button>
+        </div>
+
         <!-- Barra de Guardar / Abrir Configuración de Escena -->
         <div class="scene-io-bar">
           <button type="button" class="btn-scene-io btn-save-scene" id="btn-save-scene" data-i18n="btnSaveScene" data-i18n-title="btnSaveSceneTitle">
@@ -156,7 +173,12 @@
       </main>
 
       <!-- Columna Derecha: Propiedades Físicas -->
-      <aside class="panel-right">
+      <aside class="panel-right" id="panel-right">
+        <!-- Cabecera de cierre en móvil -->
+        <div class="mobile-drawer-header">
+          <span class="mobile-drawer-title" data-i18n="panelPropertiesTitle">Physics Properties</span>
+          <button type="button" class="btn-close-drawer" id="btn-close-props-drawer" data-i18n="btnCloseDrawer">✕ Close</button>
+        </div>
         <!-- 1. Material del Lente -->
         <div class="group-box">
           <h4 class="group-title" data-i18n="gbMaterialTitle">Lens Material / Medium</h4>
@@ -385,6 +407,49 @@
 
       <div class="modal-footer">
         <button type="button" class="btn-primary" id="btn-accept-about" data-i18n="btnAcceptAbout">Understood & Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cartel Inicial para Dispositivos Móviles (Teléfonos Celulares) -->
+  <div class="modal-overlay modal-mobile-overlay" id="mobile-warning-modal" style="display: none;">
+    <div class="modal-card modal-card-mobile-warning">
+      <div class="modal-mobile-icon-box">
+        <div class="device-icon-wrapper">
+          <span class="device-icon-desktop">🖥️</span>
+          <span class="device-icon-mobile">📱</span>
+        </div>
+      </div>
+
+      <div class="modal-header modal-header-center">
+        <h3 class="modal-mobile-title" data-i18n="mobileWarningTitle">Desktop Experience Recommended</h3>
+      </div>
+
+      <div class="modal-body modal-body-mobile">
+        <p class="modal-mobile-highlight-msg" data-i18n="mobileWarningMsg">
+          Para vivir la mejor experiencia te recomendamos entrar desde tu computadora de escritorio.
+        </p>
+
+        <p class="modal-mobile-desc" data-i18n="mobileWarningSub">
+          Hemos habilitado controles táctiles para que puedas mover elementos, hacer zoom y probar los demos de óptica en tu celular, pero el modelado de alta precisión y el trazado de rayos están diseñados principalmente para pantalla grande y ratón.
+        </p>
+
+        <div class="modal-mobile-tips-container">
+          <div class="mobile-tip-row">
+            <span class="tip-badge">👆</span>
+            <span class="tip-text" data-i18n="mobileTipDrag">1 Dedo: Arrastra elementos, deforma nodos o desplaza la vista</span>
+          </div>
+          <div class="mobile-tip-row">
+            <span class="tip-badge">✌️</span>
+            <span class="tip-text" data-i18n="mobileTipPinch">2 Dedos: Pellizca para zoom y mueve el lienzo</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer modal-footer-center">
+        <button type="button" class="btn-primary btn-mobile-continue" id="btn-close-mobile-warning" data-i18n="mobileWarningBtn">
+          Continuar en el celular
+        </button>
       </div>
     </div>
   </div>

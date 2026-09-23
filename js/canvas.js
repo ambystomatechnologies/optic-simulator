@@ -55,6 +55,13 @@ class OpticsCanvasController {
     this.onCoordsChanged = null;
     this.onModeChanged = null;
 
+    // Estado táctil (Mobile Touch & Multi-touch Gestures)
+    this.lastTouchPos = null;
+    this.initialPinchDist = null;
+    this.initialZoom = null;
+    this.pinchMidpointWorld = null;
+    this.isPinching = false;
+
     // Inicializar listeners y bucle de renderizado
     this.initEvents();
     this.resizeCanvas();
@@ -72,6 +79,14 @@ class OpticsCanvasController {
     this.canvas.width = Math.round(rect.width * dpr);
     this.canvas.height = Math.round(rect.height * dpr);
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  getTouchCanvasCoords(touch) {
+    const rect = this.canvas.getBoundingClientRect();
+    return {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top
+    };
   }
 
   // --- TRANSFORMACIONES DE COORDENADAS ---
@@ -470,6 +485,306 @@ class OpticsCanvasController {
 
     window.addEventListener('mouseup', onMouseUp);
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // --- MANEJO DE EVENTOS TÁCTILES MÓVILES (TOUCH & MULTI-TOUCH GESTURES) ---
+
+    // 1. Tocar pantalla (1 dedo o 2 dedos para pinch-zoom)
+    const onTouchStart = (e) => {
+      // Prevenir comportamientos por defecto del navegador en el canvas
+      if (e.cancelable) e.preventDefault();
+
+      if (e.touches.length === 2) {
+        // Iniciar gesto de pellizco (Pinch to zoom + Pan con 2 dedos)
+        this.isDraggingElement = false;
+        this.isPanning = false;
+        this.selectedNodeIdx = -1;
+
+        const p1 = this.getTouchCanvasCoords(e.touches[0]);
+        const p2 = this.getTouchCanvasCoords(e.touches[1]);
+        this.initialPinchDist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+        this.initialZoom = this.zoomLevel;
+        const midX = (p1.x + p2.x) / 2.0;
+        const midY = (p1.y + p2.y) / 2.0;
+        this.pinchMidpointWorld = this.screenToWorld(midX, midY);
+        this.isPinching = true;
+        return;
+      }
+
+      if (e.touches.length === 1) {
+        this.isPinching = false;
+        const pos = this.getTouchCanvasCoords(e.touches[0]);
+        const worldPos = this.screenToWorld(pos.x, pos.y);
+        this.lastTouchPos = { x: pos.x, y: pos.y };
+
+        if (this.onCoordsChanged) {
+          this.onCoordsChanged(worldPos[0], worldPos[1]);
+        }
+
+        if (this.mode === CanvasMode.SELECT) {
+          // Tolerancia táctil más generosa para dedos
+          const touchSourceRadius = 38.0 / this.zoomLevel;
+          const touchSegmentDist = 28.0 / this.zoomLevel;
+
+          // Probar fuentes de luz
+          let foundSrc = null;
+          for (let i = this.sources.length - 1; i >= 0; i--) {
+            const src = this.sources[i];
+            const dist = Math.hypot(worldPos[0] - src.position[0], worldPos[1] - src.position[1]);
+            if (dist < touchSourceRadius) {
+              foundSrc = src;
+              break;
+            }
+          }
+
+          if (foundSrc) {
+            this.selectElement(foundSrc);
+            this.isDraggingElement = true;
+            this.dragStartWorld = [worldPos[0], worldPos[1]];
+            this.dragStartElemPos = [foundSrc.position[0], foundSrc.position[1]];
+            return;
+          }
+
+          // Probar elementos ópticos
+          let hitFound = null;
+          for (let i = this.elements.length - 1; i >= 0; i--) {
+            const elem = this.elements[i];
+            if (elem instanceof CustomLens) {
+              if (pointInPolygon(worldPos, elem.boundaryPoints)) {
+                hitFound = elem;
+                break;
+              }
+              const bpts = elem.boundaryPoints;
+              for (let j = 0; j < bpts.length; j++) {
+                const p1 = bpts[j];
+                const p2 = bpts[(j + 1) % bpts.length];
+                if (this.isPointNearSegment(worldPos, p1, p2, touchSegmentDist)) {
+                  hitFound = elem;
+                  break;
+                }
+              }
+              if (hitFound) break;
+            } else if (elem instanceof FlatMirror || elem instanceof DetectorScreen) {
+              if (this.isPointNearSegment(worldPos, elem.p1, elem.p2, touchSegmentDist)) {
+                hitFound = elem;
+                break;
+              }
+            }
+          }
+
+          if (hitFound) {
+            this.selectElement(hitFound);
+            this.isDraggingElement = true;
+            this.dragStartWorld = [worldPos[0], worldPos[1]];
+            return;
+          }
+
+          // Si tocó fondo vacío en móvil, deseleccionar y habilitar pan con 1 dedo
+          this.selectElement(null);
+          this.isPanning = true;
+        } else if (this.mode === CanvasMode.NODE_EDIT) {
+          const hitRadius = 34.0 / this.zoomLevel;
+          this.selectedNodeIdx = -1;
+
+          // Probar nodos del elemento seleccionado
+          if (this.selectedElement instanceof CustomLens) {
+            const pts = this.selectedElement.controlPoints;
+            for (let i = 0; i < pts.length; i++) {
+              if (Math.hypot(worldPos[0] - pts[i][0], worldPos[1] - pts[i][1]) < hitRadius) {
+                this.selectedNodeIdx = i;
+                this.isDraggingElement = true;
+                return;
+              }
+            }
+          } else if (this.selectedElement instanceof FlatMirror || this.selectedElement instanceof DetectorScreen) {
+            const pts = [this.selectedElement.p1, this.selectedElement.p2];
+            for (let i = 0; i < pts.length; i++) {
+              if (Math.hypot(worldPos[0] - pts[i][0], worldPos[1] - pts[i][1]) < hitRadius) {
+                this.selectedNodeIdx = i;
+                this.isDraggingElement = true;
+                return;
+              }
+            }
+          }
+
+          // Probar nodos de otros elementos
+          for (let j = this.elements.length - 1; j >= 0; j--) {
+            const elem = this.elements[j];
+            if (elem === this.selectedElement) continue;
+
+            if (elem instanceof CustomLens) {
+              const pts = elem.controlPoints;
+              for (let i = 0; i < pts.length; i++) {
+                if (Math.hypot(worldPos[0] - pts[i][0], worldPos[1] - pts[i][1]) < hitRadius) {
+                  this.selectElement(elem);
+                  this.selectedNodeIdx = i;
+                  this.isDraggingElement = true;
+                  return;
+                }
+              }
+            } else if (elem instanceof FlatMirror || elem instanceof DetectorScreen) {
+              const pts = [elem.p1, elem.p2];
+              for (let i = 0; i < pts.length; i++) {
+                if (Math.hypot(worldPos[0] - pts[i][0], worldPos[1] - pts[i][1]) < hitRadius) {
+                  this.selectElement(elem);
+                  this.selectedNodeIdx = i;
+                  this.isDraggingElement = true;
+                  return;
+                }
+              }
+            }
+          }
+
+          // Probar selección de elemento en modo nodo
+          let hitFound = null;
+          for (let j = this.elements.length - 1; j >= 0; j--) {
+            const elem = this.elements[j];
+            if (elem instanceof CustomLens) {
+              if (pointInPolygon(worldPos, elem.boundaryPoints)) { hitFound = elem; break; }
+            } else if (elem instanceof FlatMirror || elem instanceof DetectorScreen) {
+              if (this.isPointNearSegment(worldPos, elem.p1, elem.p2, 28.0 / this.zoomLevel)) { hitFound = elem; break; }
+            }
+          }
+
+          if (hitFound) {
+            this.selectElement(hitFound);
+            this.selectedNodeIdx = -1;
+            return;
+          }
+
+          // Panning si tocó fondo
+          this.isPanning = true;
+        } else if (this.mode === CanvasMode.DRAW_FREEHAND) {
+          this.isDrawing = true;
+          this.drawPoints = [worldPos];
+        } else if (this.mode === CanvasMode.DRAW_POLYGON) {
+          this.drawPoints.push(worldPos);
+        } else if (this.mode === CanvasMode.RULER) {
+          this.rulerP1 = worldPos;
+          this.rulerP2 = worldPos;
+          this.isDrawing = true;
+        }
+      }
+    };
+
+    // 2. Mover dedo (Arrastrar elemento, pan o pinch-zoom)
+    const onTouchMove = (e) => {
+      if (e.cancelable) e.preventDefault();
+
+      // Zoom con 2 dedos
+      if (e.touches.length === 2 && this.isPinching) {
+        const p1 = this.getTouchCanvasCoords(e.touches[0]);
+        const p2 = this.getTouchCanvasCoords(e.touches[1]);
+        const currentDist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+        const currentMidX = (p1.x + p2.x) / 2.0;
+        const currentMidY = (p1.y + p2.y) / 2.0;
+
+        if (this.initialPinchDist > 8) {
+          const factor = currentDist / this.initialPinchDist;
+          const newZoom = Math.max(0.15, Math.min(8.0, this.initialZoom * factor));
+          this.zoomLevel = newZoom;
+
+          // Mantener centrado sobre el punto focal del pellizco
+          const wx = this.pinchMidpointWorld[0];
+          const wy = this.pinchMidpointWorld[1];
+          this.panOffset.x = currentMidX - (this.width / 2.0) - (wx * newZoom);
+          this.panOffset.y = currentMidY - (this.height / 2.0) - (wy * newZoom);
+        }
+        return;
+      }
+
+      // Interacción con 1 dedo
+      if (e.touches.length === 1 && !this.isPinching) {
+        const pos = this.getTouchCanvasCoords(e.touches[0]);
+        const worldPos = this.screenToWorld(pos.x, pos.y);
+
+        if (this.onCoordsChanged) {
+          this.onCoordsChanged(worldPos[0], worldPos[1]);
+        }
+
+        if (this.isPanning && this.lastTouchPos) {
+          const dx = pos.x - this.lastTouchPos.x;
+          const dy = pos.y - this.lastTouchPos.y;
+          this.panOffset.x += dx;
+          this.panOffset.y += dy;
+          this.lastTouchPos = { x: pos.x, y: pos.y };
+          return;
+        }
+
+        if (this.isDraggingElement) {
+          const dx = worldPos[0] - this.dragStartWorld[0];
+          const dy = worldPos[1] - this.dragStartWorld[1];
+
+          if (this.mode === CanvasMode.SELECT) {
+            if (this.selectedElement instanceof LightSource) {
+              this.selectedElement.position[0] = this.dragStartElemPos[0] + dx;
+              this.selectedElement.position[1] = this.dragStartElemPos[1] + dy;
+            } else if (this.selectedElement && typeof this.selectedElement.translate === 'function') {
+              this.selectedElement.translate(dx, dy);
+              this.dragStartWorld = [worldPos[0], worldPos[1]];
+            }
+            this.notifySceneChanged();
+          } else if (this.mode === CanvasMode.NODE_EDIT && this.selectedNodeIdx !== -1) {
+            if (this.selectedElement instanceof CustomLens) {
+              this.selectedElement.controlPoints[this.selectedNodeIdx][0] = worldPos[0];
+              this.selectedElement.controlPoints[this.selectedNodeIdx][1] = worldPos[1];
+              this.selectedElement.invalidateCache();
+              this.notifySceneChanged();
+            } else if (this.selectedElement instanceof FlatMirror || this.selectedElement instanceof DetectorScreen) {
+              if (this.selectedNodeIdx === 0) {
+                this.selectedElement.p1[0] = worldPos[0];
+                this.selectedElement.p1[1] = worldPos[1];
+              } else if (this.selectedNodeIdx === 1) {
+                this.selectedElement.p2[0] = worldPos[0];
+                this.selectedElement.p2[1] = worldPos[1];
+              }
+              this.notifySceneChanged();
+            }
+          }
+          this.lastTouchPos = { x: pos.x, y: pos.y };
+          return;
+        }
+
+        if (this.mode === CanvasMode.DRAW_FREEHAND && this.isDrawing) {
+          const last = this.drawPoints[this.drawPoints.length - 1];
+          if (Math.hypot(worldPos[0] - last[0], worldPos[1] - last[1]) > 8.0 / this.zoomLevel) {
+            this.drawPoints.push(worldPos);
+          }
+        } else if (this.mode === CanvasMode.RULER && this.isDrawing) {
+          this.rulerP2 = worldPos;
+        }
+
+        this.lastTouchPos = { x: pos.x, y: pos.y };
+      }
+    };
+
+    // 3. Levantar dedo
+    const onTouchEnd = (e) => {
+      if (e.touches.length === 0) {
+        this.isPinching = false;
+        this.isPanning = false;
+        this.isDraggingElement = false;
+        this.selectedNodeIdx = -1;
+
+        if (this.mode === CanvasMode.DRAW_FREEHAND && this.isDrawing) {
+          this.isDrawing = false;
+          if (this.drawPoints.length >= 3) {
+            this.finishCurrentDrawing();
+          }
+        } else if (this.mode === CanvasMode.RULER && this.isDrawing) {
+          this.isDrawing = false;
+        }
+      } else if (e.touches.length === 1) {
+        // Queda un dedo activo
+        this.isPinching = false;
+        const pos = this.getTouchCanvasCoords(e.touches[0]);
+        this.lastTouchPos = { x: pos.x, y: pos.y };
+      }
+    };
+
+    canvas.addEventListener('touchstart', onTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', onTouchEnd, { passive: false });
+    window.addEventListener('touchcancel', onTouchEnd, { passive: false });
   }
 
   isPointNearSegment(pt, p1, p2, threshold = 15.0) {

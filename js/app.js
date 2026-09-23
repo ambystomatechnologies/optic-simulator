@@ -1122,9 +1122,82 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.target === aboutModal) aboutModal.style.display = 'none';
     });
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') aboutModal.style.display = 'none';
+      if (e.key === 'Escape') {
+        aboutModal.style.display = 'none';
+        if (mobileModal) mobileModal.style.display = 'none';
+      }
     });
   }
+
+  // --- CARTEL INICIAL PARA TELÉFONOS CELULARES ---
+  const mobileModal = document.getElementById('mobile-warning-modal');
+  const btnCloseMobileWarning = document.getElementById('btn-close-mobile-warning');
+
+  function isMobileOrTabletDevice() {
+    const uaCheck = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const touchScreenCheck = window.innerWidth <= 850 && (('ontouchstart' in window) || navigator.maxTouchPoints > 0);
+    return uaCheck || touchScreenCheck;
+  }
+
+  if (mobileModal && isMobileOrTabletDevice()) {
+    // Mostrar cartel inicial de recomendación para dispositivos móviles
+    mobileModal.style.display = 'flex';
+
+    if (btnCloseMobileWarning) {
+      btnCloseMobileWarning.addEventListener('click', () => {
+        mobileModal.style.display = 'none';
+      });
+    }
+
+    mobileModal.addEventListener('click', (e) => {
+      if (e.target === mobileModal) mobileModal.style.display = 'none';
+    });
+  }
+
+  // --- CONTROLES DE PANELES EN MÓVILES (DRAWERS) ---
+  const btnToggleScene = document.getElementById('btn-toggle-scene');
+  const btnToggleProps = document.getElementById('btn-toggle-props');
+  const btnCloseSceneDrawer = document.getElementById('btn-close-scene-drawer');
+  const btnClosePropsDrawer = document.getElementById('btn-close-props-drawer');
+  const drawerBackdrop = document.getElementById('drawer-backdrop');
+  const panelLeft = document.getElementById('panel-left');
+  const panelRight = document.getElementById('panel-right');
+
+  function closeMobileDrawers() {
+    if (panelLeft) panelLeft.classList.remove('mobile-open');
+    if (panelRight) panelRight.classList.remove('mobile-open');
+    if (btnToggleScene) btnToggleScene.classList.remove('active');
+    if (btnToggleProps) btnToggleProps.classList.remove('active');
+    if (drawerBackdrop) drawerBackdrop.classList.remove('active');
+  }
+
+  if (btnToggleScene && panelLeft) {
+    btnToggleScene.addEventListener('click', () => {
+      const isOpen = panelLeft.classList.contains('mobile-open');
+      closeMobileDrawers();
+      if (!isOpen) {
+        panelLeft.classList.add('mobile-open');
+        btnToggleScene.classList.add('active');
+        if (drawerBackdrop) drawerBackdrop.classList.add('active');
+      }
+    });
+  }
+
+  if (btnToggleProps && panelRight) {
+    btnToggleProps.addEventListener('click', () => {
+      const isOpen = panelRight.classList.contains('mobile-open');
+      closeMobileDrawers();
+      if (!isOpen) {
+        panelRight.classList.add('mobile-open');
+        btnToggleProps.classList.add('active');
+        if (drawerBackdrop) drawerBackdrop.classList.add('active');
+      }
+    });
+  }
+
+  if (btnCloseSceneDrawer) btnCloseSceneDrawer.addEventListener('click', closeMobileDrawers);
+  if (btnClosePropsDrawer) btnClosePropsDrawer.addEventListener('click', closeMobileDrawers);
+  if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeMobileDrawers);
 
   // Escuchar cambio de idioma
   window.addEventListener('languageChanged', () => {

@@ -151,6 +151,17 @@ const OPTICS_I18N = {
     toast_element_deleted: "Selected element removed.",
     confirm_clear: "Are you sure you want to clear the entire scene?",
 
+    // Mobile Warning Modal & Mobile Controls
+    mobileWarningTitle: "Desktop Experience Recommended",
+    mobileWarningMsg: "For the best experience, we recommend accessing from your desktop computer.",
+    mobileWarningSub: "We've enabled touch gestures so you can move elements, zoom, and explore optics demos on mobile, but high-precision lens sculpting and ray physics are best experienced on a larger screen with mouse and keyboard.",
+    mobileTipDrag: "1 Finger: Drag elements, sculpt nodes, or pan canvas",
+    mobileTipPinch: "2 Fingers: Pinch to zoom in / out & move view",
+    mobileWarningBtn: "Continue on Mobile",
+    btnMobileScene: "📋 Scene",
+    btnMobileProps: "⚙️ Settings",
+    btnCloseDrawer: "✕ Close",
+
     // Footer
     footerCopy: "© 2026 Ambystoma Technologies · 2D Optics Simulator · Hosted on GitHub Pages",
     footerLink1: "Official Portal",
@@ -304,6 +315,17 @@ const OPTICS_I18N = {
     toast_drawing_min_points: "Por favor define al menos 3 vértices para cerrar el polígono.",
     toast_element_deleted: "Elemento seleccionado eliminado.",
     confirm_clear: "¿Estás seguro de que deseas vaciar toda la escena?",
+
+    // Cartel Móvil y Controles Móviles
+    mobileWarningTitle: "Experiencia Optimizada en Escritorio",
+    mobileWarningMsg: "Para vivir la mejor experiencia te recomendamos entrar desde tu computadora de escritorio.",
+    mobileWarningSub: "Hemos habilitado controles táctiles para que puedas mover elementos, hacer zoom y probar los demos de óptica en tu celular, pero el modelado de alta precisión y el trazado de rayos están diseñados principalmente para pantalla grande y ratón.",
+    mobileTipDrag: "1 Dedo: Arrastra elementos, deforma nodos o desplaza la vista",
+    mobileTipPinch: "2 Dedos: Pellizca para zoom y mueve el lienzo",
+    mobileWarningBtn: "Continuar en el celular",
+    btnMobileScene: "📋 Escena",
+    btnMobileProps: "⚙️ Ajustes",
+    btnCloseDrawer: "✕ Cerrar",
 
     // Footer
     footerCopy: "© 2026 Ambystoma Technologies · Simulador de Óptica 2D · Alojado en GitHub Pages",

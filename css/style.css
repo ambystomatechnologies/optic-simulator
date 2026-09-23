@@ -559,6 +559,7 @@ html, body {
   height: 100%;
   display: block;
   cursor: crosshair;
+  touch-action: none;
 }
 
 /* Controles Flotantes de Zoom sobre el Canvas */
@@ -942,7 +943,219 @@ html, body {
   font-weight: bold;
 }
 
-/* Responsive */
+/* ==========================================================================
+   ESTILOS PARA DISPOSITIVOS MÓVILES (TELÉFONOS CELULARES Y TABLETS)
+   ========================================================================== */
+
+/* Botones de alternancia de paneles en el Header */
+.btn-nav-mobile-toggle {
+  display: none;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  border-radius: 9999px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-nav-mobile-toggle:hover,
+.btn-nav-mobile-toggle.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(0, 255, 204, 0.12);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* Cabeceras de Drawer dentro de los paneles en Móvil */
+.mobile-drawer-header {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.mobile-drawer-title {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--accent);
+}
+
+.btn-close-drawer {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: 6px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-close-drawer:hover {
+  color: #ffffff;
+  border-color: var(--danger);
+  background: rgba(255, 85, 119, 0.15);
+}
+
+/* Backdrop para Drawer en Móviles */
+.drawer-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 140;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.drawer-backdrop.active {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Modal Cartel Inicial de Recomendación de Escritorio */
+.modal-mobile-overlay {
+  z-index: 1100;
+}
+
+.modal-card-mobile-warning {
+  max-width: 440px;
+  border: 1px solid rgba(0, 255, 204, 0.4);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.85), 0 0 35px rgba(0, 255, 204, 0.25);
+  border-radius: 16px;
+  text-align: center;
+}
+
+.modal-mobile-icon-box {
+  padding-top: 1.25rem;
+  display: flex;
+  justify-content: center;
+}
+
+.device-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(0, 255, 204, 0.1);
+  border: 1px solid rgba(0, 255, 204, 0.35);
+  padding: 0.5rem 1.1rem;
+  border-radius: 9999px;
+  box-shadow: 0 0 18px rgba(0, 255, 204, 0.2);
+}
+
+.device-icon-desktop {
+  font-size: 1.8rem;
+  animation: pulseDevice 2s infinite ease-in-out;
+}
+
+.device-icon-mobile {
+  font-size: 1.4rem;
+  opacity: 0.75;
+}
+
+@keyframes pulseDevice {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(0, 255, 204, 0.4)); }
+  50% { transform: scale(1.08); filter: drop-shadow(0 0 12px rgba(0, 255, 204, 0.8)); }
+}
+
+.modal-header-center {
+  justify-content: center;
+  border-bottom: none;
+  padding: 0.75rem 1.25rem 0.25rem;
+}
+
+.modal-mobile-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.modal-body-mobile {
+  padding: 0.5rem 1.25rem 1rem;
+  gap: 0.85rem;
+  text-align: center;
+}
+
+.modal-mobile-highlight-msg {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(0, 255, 204, 0.09);
+  border: 1px solid rgba(0, 255, 204, 0.3);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  line-height: 1.45;
+  box-shadow: 0 0 14px rgba(0, 255, 204, 0.1);
+}
+
+.modal-mobile-desc {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.modal-mobile-tips-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  text-align: left;
+  margin-top: 0.25rem;
+}
+
+.mobile-tip-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.78rem;
+  color: var(--text-main);
+}
+
+.tip-badge {
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+
+.tip-text {
+  line-height: 1.35;
+}
+
+.modal-footer-center {
+  justify-content: center;
+  border-top: 1px solid var(--border-light);
+  padding: 1rem 1.25rem;
+}
+
+.btn-mobile-continue {
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  border-radius: 10px;
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* ==========================================================================
+   MEDIA QUERIES RESPONSIVAS
+   ========================================================================== */
+
 @media (max-width: 1100px) {
   .header-ad-zone {
     display: none;
@@ -950,16 +1163,131 @@ html, body {
 }
 
 @media (max-width: 900px) {
+  /* Mostrar botones de alternancia en Header */
+  .btn-nav-mobile-toggle {
+    display: inline-flex;
+  }
+
+  .badge-security {
+    display: none;
+  }
+
+  .mobile-drawer-header {
+    display: flex;
+  }
+
+  /* Los paneles se convierten en Drawers deslizables sobre el Canvas */
   .panel-left {
     display: none;
   }
+
   .panel-right {
-    width: 240px;
+    display: none;
+  }
+
+  .panel-left.mobile-open,
+  .panel-right.mobile-open {
+    display: flex !important;
+    position: fixed;
+    top: 58px;
+    bottom: 0;
+    z-index: 150;
+    width: min(320px, 86vw);
+    background: var(--bg-panel);
+    box-shadow: 0 0 35px rgba(0, 0, 0, 0.85);
+  }
+
+  .panel-left.mobile-open {
+    left: 0;
+    border-right: 1px solid var(--border);
+    animation: slideDrawerLeft 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .panel-right.mobile-open {
+    right: 0;
+    border-left: 1px solid var(--border);
+    animation: slideDrawerRight 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes slideDrawerLeft {
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes slideDrawerRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* Barra de herramientas inferior con scroll horizontal táctil suave */
+  .toolbar-bottom {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.45rem 0.65rem;
+    gap: 0.45rem;
+    scrollbar-width: none;
+  }
+
+  .toolbar-bottom::-webkit-scrollbar {
+    display: none;
+  }
+
+  .btn-tool,
+  .select-optics {
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    padding: 0.45rem 0.75rem;
+    min-height: 38px;
+  }
+
+  .toolbar-status-inline {
+    display: none;
   }
 }
 
 @media (max-width: 600px) {
-  .panel-right {
+  .header-navbar {
+    padding: 0 0.65rem;
+    gap: 0.5rem;
+    height: 54px;
+    min-height: 54px;
+  }
+
+  .brand-text h1 {
+    font-size: 0.95rem;
+  }
+
+  .brand-text p {
     display: none;
+  }
+
+  .navbar-logo-img {
+    height: 32px;
+  }
+
+  .nav-right-actions {
+    gap: 0.4rem;
+  }
+
+  .btn-nav-about {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.74rem;
+  }
+
+  .btn-nav-mobile-toggle {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.74rem;
+  }
+
+  .canvas-view-controls {
+    top: 10px;
+    right: 10px;
+  }
+
+  .btn-view-ctl {
+    width: 36px;
+    height: 36px;
+    font-size: 1.05rem;
   }
 }
